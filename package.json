@@ -1,0 +1,19 @@
+{
+  "name": "porgettochat_tacconi_bianchin_meregalli",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tacconss/PorgettoChat_Tacconi_Bianchin_Meregalli.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tacconss/PorgettoChat_Tacconi_Bianchin_Meregalli/issues"
+  },
+  "homepage": "https://github.com/tacconss/PorgettoChat_Tacconi_Bianchin_Meregalli#readme",
+  "description": ""
+}
