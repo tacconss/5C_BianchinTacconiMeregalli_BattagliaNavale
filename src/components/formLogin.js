@@ -29,7 +29,7 @@ export const generateLoginComponent = (parentElement) => {
             /* token = inputToken;
              isLogged = sessionStorage.getItem("logged") || false;
              privateClass = inputPrivateClass;
-
+ 
              if (isLogged) {
                  document.getElementById("loginContainer").classList.remove("visible");
                  document.getElementById("loginContainer").classList.add("hidden");
@@ -41,57 +41,69 @@ export const generateLoginComponent = (parentElement) => {
         },
 
         renderFormLogin: () => {
+
             let html = `
            <div>
-                <input type="text" id="usernameInput" placeholder="Username">
+      <input type="text" id="usernameInput" placeholder="Username">
             </div>
             <div>
                 <input type="password" id="passwordInput" placeholder="Password">
             </div>
-            <p>Non hai un account? <a href='#' id="registerLink">Registrati</a></p>
-            <button id="loginButton">Accedi</button>
-      `;
+            <p>Non hai un account? <a  id="registerA" href='#'>Registrati</a></p>
+      </div>
+        `;
 
-            parentElement.innerHTML = html;
+           parentElement.innerHTML = html;
+           document.querySelector("#ModalLabel").innerHTML = "Login";
 
-            const registerLink = parentElement.querySelector("#registerLink");
-            if (registerLink) {
-                registerLink.onclick = () => {
-                    const switchButton = document.querySelector("#closeModalClient");
-                    if (switchButton) {
-                        switchButton.click(); // Simula il click sul pulsante principale
-                    }
-                };
+           document.querySelector("#closeModalClient").onclick = () => {
+            let loginBody = document.querySelector("#loginBody");
+            loginBody.classList.add("d-none");
+            let registerBody = document.querySelector("#registerBody");
+            registerBody.classList.remove("d-none");
+            document.querySelector("#ModalLabel").innerHTML = "Register";
+
+        }
+
+
+
+            document.querySelector("#registerA").onclick = () => {
+                let loginBody = document.querySelector("#loginBody");
+                loginBody.classList.add("d-none");
+                let registerBody = document.querySelector("#registerBody");
+                registerBody.classList.remove("d-none");
+                document.querySelector("#ModalLabel").innerHTML = "Registrati";
+
             }
+/*
+            document.getElementById("loginButton").onclick = () => {
+                const username = document.getElementById("usernameInput").value;
+                const password = document.getElementById("passwordInput").value;
 
-            // (La logica per l'invio del form di login andrebbe qui)
-            const loginButton = parentElement.querySelector("#loginButton");
-            if (loginButton) {
-                loginButton.onclick = () => {
-                    const username = parentElement.querySelector("#usernameInput")?.value;
-                    const password = parentElement.querySelector("#passwordInput")?.value;
+                if (username && password) {
+                    login(username, password);
+                    .then(r => {
+                        if (r) {
+                            isLogged = true;
+                            sessionStorage.setItem("Logged", true);
 
-                    if (username && password) {
-                        login(username, password)
-                            .then(r => {
-                                if (r) {
-                                    isLogged = true;
-                                    sessionStorage.setItem("Logged", true);
-                                    // ... (gestisci la navigazione o l'aggiornamento dell'UI dopo il login)
-                                    alert("Login effettuato con successo!");
-                                } else {
-                                    alert("Credenziali errate");
-                                }
-                            })
-                            .catch(err => {
-                                console.error("Errore durante il login:", err);
-                                alert("Errore durante il login");
+                            document.getElementById("loginContainer").classList.remove("visible");
+                            document.getElementById("loginContainer").classList.add("hidden");
+                            document.querySelectorAll("." + privateClass).forEach(e => {
+                                e.classList.remove("hidden");
+                                e.classList.add("visible");
                             });
-                    } else {
-                        alert("Inserisci username e password.");
-                    }
-                };
-            }
+                        } else {
+                            alert("Credenziali errate");
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err) ;
+                    });
+                }
+                    
+            };
+            */
         },
         isLogged: () => {
             return isLogged;
@@ -107,45 +119,36 @@ export const generateLoginComponent = (parentElement) => {
                     <input type="password" id="password" placeholder="Password">
                 </div>
                 <div class="input-container">
-                    <label>Registrati come:</label>
+                    <label>Register as:</label>
                     <div class="role-selection">
                         <input type="radio" id="approver" name="role" value="approver">
                         <label class="role-btn black" for="approver">approver</label>
                         <input type="radio" id="editor" name="role" value="editor">
                         <label class="role-btn gray" for="editor">editor</label>
                     </div>
-                    <p>Hai già un account? <a href='#' id="loginLink">Accedi</a></p>
+                    <p>hai già un account? <a  id="AccediA" href='#'>Accedi</a></p>
                 </div>
-                <button id="registerButton">Registrati</button>
                 <div id="result"></div>`;
             parentElement.innerHTML = html;
+            document.querySelector("#ModalLabel").innerHTML = "Registrati";
+            document.querySelector("#AccediA").onclick = () => {
+                let loginBody = document.querySelector("#loginBody");
+                loginBody.classList.remove("d-none");
+                let registerBody = document.querySelector("#registerBody");
+                registerBody.classList.add("d-none");
+                document.querySelector("#ModalLabel").innerHTML = "Login";
 
-            const loginLink = parentElement.querySelector("#loginLink");
-            if (loginLink) {
-                loginLink.onclick = () => {
-                    const switchButton = document.querySelector("#closeModalClient");
-                    if (switchButton) {
-                        switchButton.click(); // Simula il click sul pulsante principale
-                    }
-                };
+            }
+            document.querySelector("#closeModalClient").onclick = () => {
+                let loginBody = document.querySelector("#loginBody");
+                loginBody.classList.remove("d-none");
+                let registerBody = document.querySelector("#registerBody");
+                registerBody.classList.add("d-none");
+                document.querySelector("#ModalLabel").innerHTML = "Login";
+
             }
 
-            const registerButton = parentElement.querySelector("#registerButton");
-            if (registerButton) {
-                registerButton.onclick = () => {
-                    const email = parentElement.querySelector("#email")?.value;
-                    const password = parentElement.querySelector("#password")?.value;
-                    const role = parentElement.querySelector('input[name="role"]:checked')?.value;
 
-                    if (email && password && role) {
-                        // Qui andrebbe la tua logica di registrazione
-                        console.log("Registrazione:", email, password, role);
-                        alert("Registrazione simulata!");
-                    } else {
-                        alert("Compila tutti i campi per la registrazione.");
-                    }
-                };
-            }
         }
     };
 };
