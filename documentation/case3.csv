@@ -1,0 +1,44 @@
+Caso 3 – Ricevere e accettare inviti (UC3):
+
+
+
+
+·       ID: UC3
+
+
+
+
+·       Attori: giocatore
+
+
+
+
+·       Precondizioni: L’utente si è registrato e  loggato come giocatore, è nella pagina principale e non sta giocando alcuna partita
+
+
+
+
+·       Sequenza eventi:
+
+
+
+
+
+o   Il giocatore riceve l’invito da un altro giocatore per partecipare alla partita
+
+
+
+
+
+
+
+
+
+o   Accettando,il giocatore inizierà la partita con l’altro giocatore
+ 
+
+
+
+
+
+Postcondizioni: Il giocatore gioca la partita contro un altro
