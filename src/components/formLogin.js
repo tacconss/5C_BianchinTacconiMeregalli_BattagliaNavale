@@ -45,7 +45,8 @@ export const generateLoginComponent = (parentElement) => {
                             if (success) {
                                 isLogged = true;
                                 sessionStorage.setItem("logged", "true");
-                                alert("Login effettuato con successo!");
+                                //alert("Login effettuato con successo!");
+                                window.location.href = "prova.html";
                                 document.getElementById("modal").style.display = "none";
                             } else {
                                 alert("Credenziali errate");
@@ -91,4 +92,5 @@ export const generateLoginComponent = (parentElement) => {
 
         isLogged: () => isLogged,
     };
+    
 };

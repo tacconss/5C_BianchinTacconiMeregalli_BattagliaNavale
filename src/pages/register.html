@@ -1,15 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="src/css/register.css">
-</head>
-<body>
-    <div id="register">
-
+<div id="registerBody" class="d-none"></div>
+    <h2>Registrati</h2>
+    <div class="input-container">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Email" required>
     </div>
-    <script src="src/components/formLogin.js" type="module"></script>
-</body>
-</html>
+    <div class="input-container">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Password" required>
+    </div>
+    <div class="input-container">
+        <label>Registrati come:</label>
+        <div class="role-selection">
+            <input type="radio" id="approver" name="role" value="approver" required>
+            <label for="approver">Approver</label>
+            <input type="radio" id="editor" name="role" value="editor" required>
+            <label for="editor">Editor</label>
+        </div>
+    </div>
+    <div>
+        <button id="registerButton">Registrati</button>
+    </div>
+    <p>Hai già un account? <a id="AccediA" href="#">Accedi</a></p>
+</div>
