@@ -2,7 +2,7 @@ export const generateLoginComponent = (parentElement) => {
     let isLogged = false;
 
     const login = (username, password) => {
-        // Sostituisci con una fetch reale se necessario
+        //Dati fittizzi per login
         return Promise.resolve(username === 'admin' && password === 'password');
     };
 
@@ -76,16 +76,13 @@ export const generateLoginComponent = (parentElement) => {
             parentElement.innerHTML = html;
             document.querySelector("#ModalLabel").innerText = "Login";
 
-            // --- MODIFICA QUI ---
+         
             document.querySelector("#registerA").onclick = (e) => {
-                e.preventDefault(); // Previene il comportamento di default del link (navigare a '#')
-                window.location.href = "register.html"; // Reindirizza alla pagina register.html
-                // Le righe sottostanti non servono più se reindirizzi a un'altra pagina
-                // document.getElementById("loginBody").classList.add("d-none");
-                // document.getElementById("registerBody").classList.remove("d-none");
-                // loginComponent.renderFormRegister(); 
+               
+                window.location.href = "register.html"; 
+            
             };
-            // --- FINE MODIFICA ---
+           
 
             document.getElementById("loginButton").onclick = () => {
                 const username = document.getElementById("usernameInput").value;
@@ -97,14 +94,13 @@ export const generateLoginComponent = (parentElement) => {
                             if (success) {
                                 isLogged = true;
                                 sessionStorage.setItem("logged", "true");
-                                //alert("Login effettuato con successo!");
+                                
                                 window.location.href = "prova.html";
-                                // Assumendo che 'modal' sia l'ID del tuo modal/popup
+                              
                                 const modalElement = document.getElementById("modal"); 
                                 if (modalElement) {
                                     modalElement.style.display = "none";
-                                    // Se usi Bootstrap Modal, potresti dover usare:
-                                    // bootstrap.Modal.getInstance(modalElement).hide(); 
+                                    
                                 }
                             } else {
                                 alert("Credenziali errate");
