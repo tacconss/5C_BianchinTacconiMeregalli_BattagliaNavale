@@ -138,14 +138,63 @@
 
         <section id="umlcasidusodescrittivi">
           <h2> Casi d'uso descrittivi</h2>
-          <p>
-            <a href="/5C_BianchinTacconiMeregalli_BattagliaNavale/documentation/case1.csv"></a>
-          </p>
           <div id="csv-data-container">
-            <p>Caso 1 – Registrazione al sito (UC1):</p>
+            <p><h1>Caso 1 – Registrazione al sito (UC1):</h1></p>
             <p>·       ID: UC1</p>
             <p>·       Attori: Utente non Registrato</p>
-            <p></p>
+            <p>·       Precondizioni: Accesso all’applicazione web</p>
+            <p>·       Sequenza eventi: </p>
+            <p>o       l’utente si registra all’applicazione</p>
+            <p>o       Postcondizioni:l’utente diventa giocatore e può accedere alla login</p>
+            <hr>
+
+            <p><h1>Caso 2 – Login al sito (UC2):</h1></p>
+            <p>·       ID: UC2</p>
+            <p>·       Attori: Utente non loggato</p>
+            <p>·       Precondizioni: Accesso all’applicazione web e registrazione già effettuata</p>
+            <p>·       Sequenza eventi: </p>
+            <p>o       L’utente effettua la login</p>
+            <p>o       Una volta effettuata la login, il giocatore si troverà nella pagina principale</p>
+            <p>·       Postcondizioni: Il giocatore accede alle funzioni dell’applicazione</p>
+            <hr>
+
+            <p><h1>Caso 3 – Ricevere e accettare inviti (UC3):</h1></p>
+            <p>·       ID: UC3</p>
+            <p>·       Attori: giocatore</p>
+            <p>·       Precondizioni: L’utente si è registrato e loggato come giocatore, è nella pagina principale e non sta giocando alcuna partita</p>
+            <p>·       Sequenza eventi: </p>
+            <p>o       Il giocatore riceve l’invito da un altro giocatore per partecipare alla partita</p>
+            <p>o       Accettando, il giocatore inizierà la partita con l’altro giocatore</p>
+            <p>·       Postcondizioni: Il giocatore gioca la partita contro un altro</p>
+            <hr>
+
+            <p><h1>Caso 4 – Ricevere e rifiutare inviti (UC4):</h1></p>
+            <p>·       ID: UC4</p>
+            <p>·       Attori: giocatore</p>
+            <p>·       Precondizioni: L’utente si è registrato e loggato come giocatore, è nella pagina principale e non sta giocando nessuna partita</p>
+            <p>·       Sequenza eventi: </p>
+            <p>o       Il giocatore riceve l’invito da un altro giocatore per partecipare alla partita</p>
+            <p>o       Il giocatore rifiuta l’invito dell’altro giocatore</p>
+            <p>·       Postcondizioni: Il giocatore rimane nella pagina principale senza giocare alcuna partita</p>
+            <hr>
+
+            <p><h1>Caso 5 – Inviare inviti (UC5):</h1></p>
+            <p>·       ID: UC5</p>
+            <p>·       Attori: giocatore</p>
+            <p>·       Precondizioni: L’utente si è registrato e loggato come giocatore, è nella pagina principale e non sta giocando nessuna partita</p>
+            <p>·       Sequenza eventi: </p>
+            <p>o       Il giocatore invia l’invito ad una partita ad un altro giocatore</p>
+            <p>o       L’altro giocatore riceve l’invito</p>
+            <p>·       Postcondizioni: se il giocatore a cui si è mandato l’invito accetta, il giocatore gioca la partita contro l’altro, altrimenti se rifiutato non inizierà alcuna partita</p>
+            <hr>
+
+            <p><h1>Caso 6 – Abbandonare partita (UC6):</h1></p>
+            <p>·       ID: UC6</p>
+            <p>·       Attori: giocatore</p>
+            <p>·       Precondizioni: L’utente si è loggato e registrato come giocatore, ha accettato/gli è stato accettato un invito per una partita</p>
+            <p>·       Sequenza eventi: </p>
+            <p>o       Il giocatore sta giocando una partita</p>
+            <p>·       Postcondizioni: Il giocatore abbandona la partita e la vittoria andrà all’avversario</p>
         </div>
     
           <hr>
