@@ -1,4 +1,4 @@
-const generatePartitaComponent = (parentElement) => {
+export const generatePartitaComponent = (parentElement) => {
     let idPartita; /*id preso da db*/
     let stato=false/*stato partita se in esecuzione o me, se in esecuzione false senno true*/
     let giocatoreCorrente;/*giocatore 1 o 2/*
