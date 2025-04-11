@@ -1,4 +1,4 @@
-export const generatePartitaComponent = (parentElement) => {
+export const generateGiocatoreComponent = (parentElement) => {
     let username; /* preso da db*/
     let passwordHash/* preso da db*/
     let stato;/*se sta giocando o è libero*/
