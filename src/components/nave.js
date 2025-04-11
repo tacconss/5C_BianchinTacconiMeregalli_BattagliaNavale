@@ -1,7 +1,7 @@
 export const generateShipComponent = (parentElement) => {
-    let tipo; /* preso da db*/
-    let dimensione/* preso da db*/
-    let partiColpite;/*se sta giocando o è libero*/
+    let tipo;
+    let dimensione;
+    let partiColpite;
     let posizioe=[/*istanza di coordinate*/]; /*array di coordinate*/
 
     return {
