@@ -10,8 +10,9 @@ const express = require("express");
  
  app.use("/", express.static(path.join(__dirname, "..")));
  app.use("/node_modules", express.static(path.join(process.cwd(), "node_modules")));
+
  server.listen(PORT, () => {
-   console.log(`Server attivo su http://localhost:${PORT}/pages/home.html`);
+   console.log(`Server attivo su http://localhost:${PORT}/pages/login.html`);
  });
  
  let users = [];
