@@ -1,9 +1,10 @@
 {
-  "name": "porgettochat_tacconi_bianchin_meregalli",
+  "name": "progettochat_tacconi_bianchin_meregalli",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Progetto chat con Express e Socket.IO",
+  "main": "src/webSocket/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/webSocket/server.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,9 @@
     "url": "https://github.com/tacconss/PorgettoChat_Tacconi_Bianchin_Meregalli/issues"
   },
   "homepage": "https://github.com/tacconss/PorgettoChat_Tacconi_Bianchin_Meregalli#readme",
-  "description": ""
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  },
+  "keywords": []
 }

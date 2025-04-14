@@ -1,163 +1,72 @@
-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f3f4f6;
-    margin: 0;
-    font-family: 'Arial', sans-serif;
-}
-#register {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    width: 350px;
+
+
+#registerBody > h2 {
+    color: #333;
+    margin-bottom: 20px;
     text-align: center;
 }
-h2 {
-    font-size: 1.7em;
-    color: #333;
-    font-family: 'Poppins', sans-serif;
-    margin-bottom: 20px;
-}
+
 .input-container {
-    width: 100%;
-    text-align: left;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
-label {
+
+.input-container label {
     display: block;
-    font-size: 0.9em;
-    color: #333;
     margin-bottom: 5px;
+    color: #555;
+    font-weight: bold;
 }
-input {
-    width: 100%;
+
+.input-container input[type="email"],
+.input-container input[type="password"] {
+    width: calc(100% - 12px); /* Considera il padding */
     padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1em;
-    box-sizing: border-box;
+    border-radius: 4px;
+    box-sizing: border-box; /* Importante per non sballare la larghezza con il padding */
+    font-size: 16px;
 }
+
 .role-selection {
     display: flex;
-    justify-content: center;
+    gap: 15px;
+    align-items: center;
     margin-top: 5px;
-    border-radius: 25px;
-    overflow: hidden;
-    background-color: #ddd;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
 }
-.role-btn {
-    padding: 12px 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-    font-size: 1em;
-    text-align: center;
-    flex: 1;
-    background-color: #e0e0e0;
-    color: black;
-    border: none;
-    font-weight: bold;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 100px;
+
+.role-selection input[type="radio"] {
+    margin-right: 5px;
 }
-.role-btn:first-of-type {
-    border-radius: 25px 0 0 25px;
-}
-.role-btn:last-of-type {
-    border-radius: 0 25px 25px 0;
-}
-input[type="radio"] {
-    display: none;
-}
-input[type="radio"]:checked + label {
-    background-color: black;
+
+#registerButton {
+    background-color: #007bff;
     color: white;
-}
-.social-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
-}
-.social-btn {
-    padding: 8px 12px;
+    padding: 10px 20px;
     border: none;
-    border-radius: 5px;
-    font-size: 0.9em;
+    border-radius: 4px;
     cursor: pointer;
-}
-.black {
-    background-color: black;
-    color: white;
-}
-.gray {
-    background-color: lightgray;
-    color: black;
-}
-button#applyButton {
+    font-size: 16px;
+    transition: background-color 0.3s ease;
     width: 100%;
-    padding: 10px;
-    background-color: #2b5dab;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 1em;
-    cursor: pointer;
+    display: block;
+    margin-top: 20px;
+}
+
+#registerButton:hover {
+    background-color: #0056b3;
+}
+
+#registerBody > p {
     margin-top: 15px;
-}
-button#applyButton:hover {
-    background-color: #1d3f7f;
-}
-.role-selection {
-    display: flex;
-}
-
-.role-btn {
-    padding: 12px 25px;
-    cursor: pointer;
-    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
-    font-size: 1em;
     text-align: center;
-    flex: 1;
-    background-color: #e0e0e0;
-    color: black;
-    border: none;
-    font-weight: bold;
-    border-radius: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 100px;
+    color: #777;
 }
 
-.role-btn:first-of-type {
-    border-radius: 25px 0 0 25px;
+#AccediA {
+    color: #007bff;
+    text-decoration: none;
 }
 
-.role-btn:last-of-type {
-    border-radius: 0 25px 25px 0;
+#AccediA:hover {
+    text-decoration: underline;
 }
-
-input[type="radio"] {
-    display: none;
-}
-
-input[type="radio"]:checked + label {
-    background-color: black;
-    color: white;
-}
-
-/* Stile per il pulsante non selezionato */
-.role-btn:not(:has(+ :checked)) {
-    background-color: lightgray;
-    color: black;
-}
-

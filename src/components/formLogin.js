@@ -1,103 +1,118 @@
 export const generateLoginComponent = (parentElement) => {
-    let token;
-    let isLogged;
-    let privateClass;
+    let isLogged = false;
 
     const login = (username, password) => {
-        /* return new Promise((resolve, reject) => {
-             fetch("https://ws.cipiaceinfo.it/credential/login", {
-                 method: "POST",
-                 headers: {
-                     "content-type": "application/json",
-                     "key": token
-                 },
-                 body: JSON.stringify({
-                     username: username,
-                     password: password
-                 })
-             })
-             .then(r => r.json())
-             .then(data => resolve(data.result))
-             .catch(err => reject(err.result));
-         });*/
-        return true;
+        //Dati fittizzi per login
+        return Promise.resolve(username === 'admin' && password === 'password');
     };
 
     return {
-        build: () => {//inputToken, inputPrivateClass) => {
-            isLogged = true;
-            /* token = inputToken;
-             isLogged = sessionStorage.getItem("logged") || false;
-             privateClass = inputPrivateClass;
-
-             if (isLogged) {
-                 document.getElementById("loginContainer").classList.remove("visible");
-                 document.getElementById("loginContainer").classList.add("hidden");
-                 document.querySelectorAll("." + privateClass).forEach(e => {
-                     e.classList.remove("hidden");
-                     e.classList.add("visible");
-                 });
-             }*/
+        build: () => {
+            isLogged = sessionStorage.getItem("logged") === "true";
         },
 
-        renderFormLogin: () => {
-            let html = `
-           <div>
-                <input type="text" id="usernameInput" placeholder="Username">
-            </div>
-            <div>
-                <input type="password" id="passwordInput" placeholder="Password">
-            </div>
-            <p>Non hai un account? <a href='#' id="registerLink">Registrati</a></p>
-            <button id="loginButton">Accedi</button>
-      `;
+        /*renderFormLogin: () => {
+            const html = `
+                <div>
+                    <input type="text" id="usernameInput" placeholder="Username">
+                </div>
+                <div>
+                    <input type="password" id="passwordInput" placeholder="Password">
+                </div>
+                <div>
+                    <button id="loginButton">Login</button>
+                </div>
+                <p>Non hai un account? <a id="registerA" href="#">Registrati</a></p>
+            `;
 
             parentElement.innerHTML = html;
+            document.querySelector("#ModalLabel").innerText = "Login";
 
-            const registerLink = parentElement.querySelector("#registerLink");
-            if (registerLink) {
-                registerLink.onclick = () => {
-                    const switchButton = document.querySelector("#closeModalClient");
-                    if (switchButton) {
-                        switchButton.click(); // Simula il click sul pulsante principale
-                    }
-                };
-            }
+            document.querySelector("#registerA").onclick = (e) => {
+                e.preventDefault();
+                document.getElementById("loginBody").classList.add("d-none");
+                document.getElementById("registerBody").classList.remove("d-none");
+                loginComponent.renderFormRegister();
+            };
 
-            // (La logica per l'invio del form di login andrebbe qui)
-            const loginButton = parentElement.querySelector("#loginButton");
-            if (loginButton) {
-                loginButton.onclick = () => {
-                    const username = parentElement.querySelector("#usernameInput")?.value;
-                    const password = parentElement.querySelector("#passwordInput")?.value;
+            
 
-                    if (username && password) {
-                        login(username, password)
-                            .then(r => {
-                                if (r) {
-                                    isLogged = true;
-                                    sessionStorage.setItem("Logged", true);
-                                    // ... (gestisci la navigazione o l'aggiornamento dell'UI dopo il login)
-                                    alert("Login effettuato con successo!");
-                                } else {
-                                    alert("Credenziali errate");
+            document.getElementById("loginButton").onclick = () => {
+                const username = document.getElementById("usernameInput").value;
+                const password = document.getElementById("passwordInput").value;
+
+                if (username && password) {
+                    login(username, password)
+                        .then(success => {
+                            if (success) {
+                                isLogged = true;
+                                sessionStorage.setItem("logged", "true");
+                                //alert("Login effettuato con successo!");
+                                window.location.href = "prova.html";
+                                document.getElementById("modal").style.display = "none";
+                            } else {
+                                alert("Credenziali errate");
+                            }
+                        })
+                        .catch(err => console.log(err));
+                }
+            };
+        },*/
+
+        renderFormLogin: () => {
+            const html = `
+                <div>
+                    <input type="text" id="usernameInput" placeholder="Username">
+                </div>
+                <div>
+                    <input type="password" id="passwordInput" placeholder="Password">
+                </div>
+                <div>
+                    <button id="loginButton">Login</button>
+                </div>
+                <p>Non hai un account? <a id="registerA" href="#">Registrati</a></p> 
+                `;
+
+            parentElement.innerHTML = html;
+            document.querySelector("#ModalLabel").innerText = "Login";
+
+         
+            document.querySelector("#registerA").onclick = (e) => {
+               
+                window.location.href = "register.html"; 
+            
+            };
+           
+
+            document.getElementById("loginButton").onclick = () => {
+                const username = document.getElementById("usernameInput").value;
+                const password = document.getElementById("passwordInput").value;
+
+                if (username && password) {
+                    login(username, password)
+                        .then(success => {
+                            if (success) {
+                                isLogged = true;
+                                sessionStorage.setItem("logged", "true");
+                                
+                                window.location.href = "prova.html";
+                              
+                                const modalElement = document.getElementById("modal"); 
+                                if (modalElement) {
+                                    modalElement.style.display = "none";
+                                    
                                 }
-                            })
-                            .catch(err => {
-                                console.error("Errore durante il login:", err);
-                                alert("Errore durante il login");
-                            });
-                    } else {
-                        alert("Inserisci username e password.");
-                    }
-                };
-            }
+                            } else {
+                                alert("Credenziali errate");
+                            }
+                        })
+                        .catch(err => console.log(err));
+                }
+            };
         },
-        isLogged: () => {
-            return isLogged;
-        },
+
         renderFormRegister: () => {
-            let html = `
+            const html = `
                 <div class="input-container">
                     <label for="email">Email</label>
                     <input type="email" id="email" placeholder="Email">
@@ -107,45 +122,29 @@ export const generateLoginComponent = (parentElement) => {
                     <input type="password" id="password" placeholder="Password">
                 </div>
                 <div class="input-container">
-                    <label>Registrati come:</label>
+                    <label>Register as:</label>
                     <div class="role-selection">
                         <input type="radio" id="approver" name="role" value="approver">
-                        <label class="role-btn black" for="approver">approver</label>
+                        <label for="approver">Approver</label>
                         <input type="radio" id="editor" name="role" value="editor">
-                        <label class="role-btn gray" for="editor">editor</label>
+                        <label for="editor">Editor</label>
                     </div>
-                    <p>Hai già un account? <a href='#' id="loginLink">Accedi</a></p>
+                    <p>Hai già un account? <a id="AccediA" href="#">Accedi</a></p>
                 </div>
-                <button id="registerButton">Registrati</button>
-                <div id="result"></div>`;
-            parentElement.innerHTML = html;
+            `;
 
-            const loginLink = parentElement.querySelector("#loginLink");
-            if (loginLink) {
-                loginLink.onclick = () => {
-                    const switchButton = document.querySelector("#closeModalClient");
-                    if (switchButton) {
-                        switchButton.click(); // Simula il click sul pulsante principale
-                    }
-                };
-            }
+            document.getElementById("registerBody").innerHTML = html;
+            document.querySelector("#ModalLabel").innerText = "Registrati";
 
-            const registerButton = parentElement.querySelector("#registerButton");
-            if (registerButton) {
-                registerButton.onclick = () => {
-                    const email = parentElement.querySelector("#email")?.value;
-                    const password = parentElement.querySelector("#password")?.value;
-                    const role = parentElement.querySelector('input[name="role"]:checked')?.value;
+            document.querySelector("#AccediA").onclick = (e) => {
+                e.preventDefault();
+                document.getElementById("registerBody").classList.add("d-none");
+                document.getElementById("loginBody").classList.remove("d-none");
+                loginComponent.renderFormLogin();
+            };
+        },
 
-                    if (email && password && role) {
-                        // Qui andrebbe la tua logica di registrazione
-                        console.log("Registrazione:", email, password, role);
-                        alert("Registrazione simulata!");
-                    } else {
-                        alert("Compila tutti i campi per la registrazione.");
-                    }
-                };
-            }
-        }
+        isLogged: () => isLogged,
     };
+    
 };
