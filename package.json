@@ -1,5 +1,5 @@
 {
-  "name": "progettochat_tacconi_bianchin_meregalli",
+  "name": "progettoBattagliaNavale_tacconi_bianchin_meregalli",
   "version": "1.0.0",
   "description": "Progetto chat con Express e Socket.IO",
   "main": "src/webSocket/server.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tacconss/PorgettoChat_Tacconi_Bianchin_Meregalli.git"
+    "url": "git+https://github.com/tacconss/5C_BianchinTacconiMeregalli_BattagliaNavale"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/tacconss/PorgettoChat_Tacconi_Bianchin_Meregalli/issues"
+    "url": "https://github.com/tacconss/5C_BianchinTacconiMeregalli_BattagliaNavale"
   },
-  "homepage": "https://github.com/tacconss/PorgettoChat_Tacconi_Bianchin_Meregalli#readme",
+  "homepage": "https://github.com/tacconss/5C_BianchinTacconiMeregalli_BattagliaNavale#readme",
   "dependencies": {
     "express": "^4.21.2",
     "socket.io": "^4.8.1"
