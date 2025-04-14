@@ -1,7 +1,6 @@
 
-
-
-export function updatePlayerList(users) {
+ 
+ export function updatePlayerList(users) {
   let html = "";
   for (let i = 0; i < users.length; i++) {
     html += "<li>" + users[i].name + "</li>";

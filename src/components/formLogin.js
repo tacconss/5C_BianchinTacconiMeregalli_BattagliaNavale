@@ -95,7 +95,7 @@ export const generateLoginComponent = (parentElement) => {
                                 isLogged = true;
                                 sessionStorage.setItem("logged", "true");
                                 
-                                window.location.href = "prova.html";
+                                window.location.href = "home.html";
                               
                                 const modalElement = document.getElementById("modal"); 
                                 if (modalElement) {
