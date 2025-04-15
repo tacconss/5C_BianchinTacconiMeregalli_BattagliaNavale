@@ -22,6 +22,9 @@
   <link rel="stylesheet" type="text/css" href="assets/vendor/highlight.js/styles/github.css" />
   <!-- Custom Stylesheet -->
   <link rel="stylesheet" type="text/css" href="assets/css/stylesheet.css" />
+
+  <link rel="stylesheet" type="text/css" href="../documentation/assets/css/table.css" />
+
 </head>
 
 <body data-spy="scroll" data-target=".idocs-navigation" data-offset="125">
@@ -228,9 +231,159 @@
           </section>
 
           <section id="umler">
-            <h2>Schema ER</h2>
-
             <img src="/documentation/assets/images/ER/schemaER.png" alt="">
+            <h2>Tabella dei Vincoli (Diagramma ER)</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Entità</th>
+                <th>Attributo</th>
+                <th>Tipo di Dato</th>
+                <th>Vincoli</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Utente</td>
+                <td>ID Utente</td>
+                <td>number</td>
+                <td>PK, Univoco, Non nullo</td>
+                
+            </tr>
+            <tr>
+                <td>Utente</td>
+                <td>Nome Giocatore</td>
+                <td>varChar</td>
+                <td></td>
+                
+            </tr>
+            <tr>
+                <td>Utente</td>
+                <td>stato_giocatore</td>
+                <td>boolean</td>
+                <td></td>
+            </tr>
+            
+            <tr>
+                <td>Partita</td>
+                <td>ID Partita</td>
+                <td>number</td>
+                <td>PK, Univoco, Non nullo</td>
+                
+            </tr>
+            
+            <tr>
+                <td>Partita</td>
+                <td>Timer</td>
+                <td>Data Time</td>
+                <td></td>
+                
+            </tr>
+            <tr>
+              <td>Partita</td>
+              <td>Disposizione Navi</td>
+              <td>intero</td>
+              <td></td>
+              
+          </tr>
+            <tr>
+                <td>Partita</td>
+                <td>Risultato</td>
+                <td>number</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Turno</td>
+                <td>ID Turno</td>
+                <td>number</td>
+                <td>PK, Univoco, Non nullo</td>
+            </tr>
+            
+            <tr>
+                <td>Turno</td>
+                <td>Giocatore Corrente</td>
+                <td>Number</td>
+                <td>FK, riferimento a Utente (<span class="chiave-esterna">ID Utente</span>)</td>
+              
+            </tr>
+            <tr>
+                <td>Casella</td>
+                <td>ID Casella</td>
+                <td>Number</td>
+                <td>PK, Univoco, Non nullo</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Casella</td>
+                <td>Posizione Orizzontale</td>
+                <td>(Non specificato)</td>
+                <td>No</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Casella</td>
+                <td>Posizione Verticale</td>
+                <td>(Non specificato)</td>
+                <td>No</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>Casella</td>
+                <td>Stato Casella</td>
+                <td>(Non specificato)</td>
+                <td>No</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td rowspan="2"><strong>Gioca</strong> (Relazione)</td>
+                <td>ID Utente</td>
+                <td>(Non specificato)</td>
+                <td class="chiave-primaria chiave-esterna">Sì (FK)</td>
+                <td>Fa riferimento a Utente (<span class="chiave-esterna">ID Utente</span>)</td>
+                <td rowspan="2">Molti utenti possono giocare più partite (N)<br>Una partita può avere più giocatori (N)</td>
+            </tr>
+            <tr>
+                <td>ID Partita</td>
+                <td>(Non specificato)</td>
+                <td class="chiave-primaria chiave-esterna">Sì (FK)</td>
+                <td>Fa riferimento a Partita (<span class="chiave-esterna">ID Partita</span>)</td>
+            </tr>
+            <tr>
+                <td rowspan="2"><strong>Svolge</strong> (Relazione)</td>
+                <td>ID Partita</td>
+                <td>(Non specificato)</td>
+                <td class="chiave-primaria chiave-esterna">Sì (FK)</td>
+                <td>Fa riferimento a Partita (<span class="chiave-esterna">ID Partita</span>)</td>
+                <td rowspan="2">Una partita ha più turni (1)<br>Un turno appartiene a una partita (1)</td>
+            </tr>
+            <tr>
+                <td>ID Turno</td>
+                <td>(Non specificato)</td>
+                <td class="chiave-primaria chiave-esterna">Sì (FK)</td>
+                <td>Fa riferimento a Turno (<span class="chiave-esterna">ID Turno</span>)</td>
+            </tr>
+            <tr>
+                <td rowspan="2"><strong>Occupa</strong> (Relazione)</td>
+                <td>ID Turno</td>
+                <td>(Non specificato)</td>
+                <td class="chiave-primaria chiave-esterna">Sì (FK)</td>
+                <td>Fa riferimento a Turno (<span class="chiave-esterna">ID Turno</span>)</td>
+                <td rowspan="2">Un turno occupa una casella (1)<br>Una casella può essere occupata da un turno (1)</td>
+            </tr>
+            <tr>
+                <td>ID Casella</td>
+                <td>(Non specificato)</td>
+                <td class="chiave-primaria chiave-esterna">Sì (FK)</td>
+                <td>Fa riferimento a Casella (<span class="chiave-esterna">ID Casella</span>)</td>
+            </tr>
+        </tbody>
+    </table>
+
+            
             <hr>
 
           </section>
