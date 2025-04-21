@@ -1,36 +1,43 @@
-export const generatePartitaComponent = (parentElement) => {
-    let idPartita; /*id preso da db*/
-    let stato=false/*stato partita se in esecuzione o me, se in esecuzione false senno true*/
-    let giocatoreCorrente;/*giocatore 1 o 2/*
-    let vincitore;/*giocatore 1 o 2 o*/
-    let vincitore;/*giocatore 1 o 2*/
+export const generatePartitaComponent = (parentElement, avversario) => {
+    let idPartita;
+    let stato = false;
+    let giocatoreCorrente;
+    let vincitore;
+
+    const creaGriglia = () => {
+    };
+
+    const inizia = () => {
+    };
 
     return {
-        inizia: (/*istanza giocatore1,istanzagiocatore2*/) => {
-        },
-
+        inizia,
         cambiaTurno: () => {
-            /*logoica per switchare i turni*/
+            // Da completare
         },
-
-        registraColpo: (/*istanza di colpo*/) => {
-        /*logica per gestire il colpo*/
-        return risultatoColpo;
+        registraColpo: () => {
+            return null; // Da completare
         },
-
         verificaFinePartita: () => {
-            /*logica per verificare se la partita è finita*/
-            return isfinish;
+            return false; // Da completare
         },
-
-        termina:(/*(da rivedere)vincitore creato con l'istamnza di giocatore*/) =>{
-        /*logica per terminare la partita e dare la vittoria al giocatore vincente*/
-        return vincitore;
-        },
-
-        gestisciAbbandono:(/*istanza di giocartore*/) =>{
-            /*logica per terminare la partita e dare la vittoria al giocatore che non ha abbandonato */
+        termina: () => {
             return vincitore;
-            }
+        },
+        gestisciAbbandono: () => {
+            return vincitore;
+        }
     };
 };
+
+// === Inizializzazione immediata ===
+
+const avversario = sessionStorage.getItem("avversario");
+if (!avversario) {
+    alert("Errore: nessun avversario trovato. Ritorno alla home.");
+    window.location.href = "home.html";
+} else {
+    const partitaContainer = document.getElementById("partita-container");
+    const partita = generatePartitaComponent(partitaContainer, avversario);
+    partita.inizia();
+}
