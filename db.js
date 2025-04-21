@@ -110,7 +110,24 @@ app.post("/register", async (req, res) => {
   
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
-  app.use("/", express.static(path.join(__dirname, "public")));
+
+  //app.use("/", express.static(path.join(__dirname, "src")));
+  app.use("/src", express.static(path.join(__dirname, "src")));
+  app.use("/pages", express.static(path.join(__dirname, "src", "pages")));
+
+
+  app.get("/", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "src", "pages", "index.html"), (err) => {
+      if (err) {
+        console.error("Errore nel caricare il file:", err);
+        res.status(500).send("Errore nel caricare la pagina");
+      }
+    });
+  });
+  
+
+  
+  
   
   // ============ ROTTA REGISTRAZIONE ============
   app.post("/register", async (req, res) => {
