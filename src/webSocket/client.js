@@ -27,11 +27,9 @@
    gameContainer.style.display = "block";
  });
  */
- import io from "/node_modules/socket.io/client-dist/socket.io.esm.min.js";
+ import { socket } from "./socket.js";
 import { updatePlayerList, updateGameList } from "../components/home.js";
 import { generateInviteComponent } from "../components/invite.js";
-
-const socket = io();
 
 const nameModal = document.getElementById("name-modal");
 const backdrop = document.getElementById("modal-backdrop");
@@ -90,8 +88,10 @@ socket.on("invito_error", (msg) => {
     alert("Errore invito: " + msg);
 });
 
-socket.on("invito_accettato", ({ con }) => {
-    alert(`Hai iniziato una partita con ${con}`);
+socket.on("avvia_partita", ({ avversario, idPartita }) => {
+  sessionStorage.setItem("avversario", avversario);
+  sessionStorage.setItem("idPartita", idPartita);
+  window.location.href = "../pages/partita.html";
 });
 
 socket.on("invito_rifiutato", ({ da }) => {
