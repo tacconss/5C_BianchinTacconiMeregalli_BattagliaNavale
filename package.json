@@ -4,7 +4,7 @@
   "description": "Progetto chat con Express e Socket.IO",
   "main": "src/webSocket/server.js",
   "scripts": {
-    "start": "node src/webSocket/server.js"
+    "start": "node db.js"
   },
   "repository": {
     "type": "git",
