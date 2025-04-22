@@ -202,7 +202,8 @@ export const generateLoginComponent = (parentElement) => {
             form.reset();
           } else {
             // Login riuscito → redirect
-            window.location.href = "/pages/home.html";
+            window.location.href = location.origin.replace("3000", "3001") + "/pages/home.html";
+
           }
         } else {
           alert(data.error || "Errore");

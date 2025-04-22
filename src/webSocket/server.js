@@ -7,7 +7,7 @@ const { Server } = require("socket.io");
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-const PORT = 3000;
+const PORT = 3001;
 
 app.use("/", express.static(path.join(__dirname, "..")));
 app.use("/node_modules", express.static(path.join(process.cwd(), "node_modules")));

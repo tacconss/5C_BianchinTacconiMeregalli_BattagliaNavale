@@ -4,7 +4,7 @@
   "description": "Progetto chat con Express e Socket.IO",
   "main": "src/webSocket/server.js",
   "scripts": {
-    "start": "node db.js"
+    "start": "concurrently \"node db.js\" \"node src/webSocket/server.js\""
   },
   "repository": {
     "type": "git",
@@ -17,15 +17,20 @@
   },
   "homepage": "https://github.com/tacconss/5C_BianchinTacconiMeregalli_BattagliaNavale#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "body-parser": "^2.2.0",
+    "currently": "^0.0.8",
     "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "http": "^0.0.1-security",
     "io": "^1.5.3",
     "mysql2": "^3.14.0",
     "path": "^0.12.7",
-    "server": "^1.0.41",
+    "server": "^0.0.3",
     "socket.io": "^4.8.1"
   },
-  "keywords": []
+  "keywords": [],
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
 }
