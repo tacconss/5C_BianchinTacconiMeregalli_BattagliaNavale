@@ -3,7 +3,8 @@
  export function updatePlayerList(users) {
   let html = "";
   for (let i = 0; i < users.length; i++) {
-    html += "<li>" + users[i].name + "</li>";
+    const stato = users[i].playing ? "in partita" : "libero";
+    html += `<li>${users[i].name} - <span>${stato}</span></li>`;
   }
   document.getElementById("player-list").innerHTML = html;
 }

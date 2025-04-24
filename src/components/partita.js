@@ -1,3 +1,12 @@
+import { socket } from "../webSocket/socket.js"; 
+
+/* 
+const username = sessionStorage.getItem("username");
+if (username) {
+    socket.emit("join", username); // Ri-registra il giocatore anche qui
+}
+    */
+
 export const generatePartitaComponent = (parentElement, avversario) => {
     let idPartita;
     let stato = false;
@@ -5,9 +14,11 @@ export const generatePartitaComponent = (parentElement, avversario) => {
     let vincitore;
 
     const creaGriglia = () => {
+        // Logica per creare la griglia
     };
 
     const inizia = () => {
+        // Logica di inizio partita
     };
 
     return {
@@ -16,10 +27,10 @@ export const generatePartitaComponent = (parentElement, avversario) => {
             // Da completare
         },
         registraColpo: () => {
-            return null; // Da completare
+            return null;
         },
         verificaFinePartita: () => {
-            return false; // Da completare
+            return false;
         },
         termina: () => {
             return vincitore;

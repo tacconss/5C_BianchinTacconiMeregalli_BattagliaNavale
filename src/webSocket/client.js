@@ -30,6 +30,10 @@
  import { socket } from "./socket.js";
 import { updatePlayerList, updateGameList } from "../components/home.js";
 import { generateInviteComponent } from "../components/invite.js";
+const savedUsername = sessionStorage.getItem("username");
+if (savedUsername) {
+    socket.emit("join", savedUsername);
+}
 
 const nameModal = document.getElementById("name-modal");
 const backdrop = document.getElementById("modal-backdrop");
@@ -46,18 +50,40 @@ const inviteComponent = generateInviteComponent(gameContainer, socket);
 
 // Evento per entrare nel gioco
 joinButton.onclick = () => {
-    const username = nameInput.value.trim();
-    if (username !== "") {
-        socket.emit("join", username);
-    }
+  const username = nameInput.value.trim();
+  if (username !== "") {
+      sessionStorage.setItem("username", username); 
+      socket.emit("join", username);
+  }
 };
 
-// Evento per inviare un invito
+/*Evento per inviare un invito
 inviteButton.onclick = () => {
     const target = inviteInput.value.trim();
+    const liList = document.querySelectorAll("#player-list li");
     if (target !== "") {
         socket.emit("invia_invito", { destinatario: target });
     }
+};
+*/
+inviteButton.onclick = () => {
+  const target = inviteInput.value.trim();
+  const liList = document.querySelectorAll("#player-list li");
+
+  // Controlla se il giocatore è in partita
+  for (let i = 0; i < liList.length; i++) {
+    const li = liList[i];
+    if (li.textContent.indexOf(target) === 0) {
+      if (li.textContent.indexOf("in partita") !== -1) {
+        alert(`${target} è attualmente in partita.`);
+        return;
+      }
+    }
+  }
+
+  if (target !== "") {
+    socket.emit("invia_invito", { destinatario: target });
+  }
 };
 
 // Ricezione errori
@@ -67,7 +93,9 @@ socket.on("join_error", (message) => {
 
 // Dopo join riuscito
 socket.on("list", (users) => {
-    updatePlayerList(users.map(u => ({ name: u.name })));
+  console.log("Lista aggiornata ricevuta:", users);
+    //updatePlayerList(users.map(u => ({ name: u.name })));
+    updatePlayerList(users.map(u => ({ name: u.name, playing: u.playing })));
     updateGameList(["Game 1 (P1 vs P2)", "Game 2 (P3 vs P4)"]);
 
     nameModal.classList.remove("show");

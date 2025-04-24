@@ -1,12 +1,11 @@
+
 export const generateInviteComponent = (parentElement, socket) => {
-    const container = document.createElement("div");
-    container.id = "invite-container";
-    parentElement.appendChild(container);
+    const container = document.getElementById("invite-container");
 
     const renderInvite = (fromUsername) => {
         container.innerHTML = `
             <div class="invite">
-                <p>🎯 Invito da <strong>${fromUsername}</strong></p>
+                <p>Invito da <strong>${fromUsername}</strong></p>
                 <button id="accept-invite">Accetta</button>
                 <button id="reject-invite">Rifiuta</button>
             </div>
@@ -27,3 +26,4 @@ export const generateInviteComponent = (parentElement, socket) => {
         mostraInvito: renderInvite
     };
 };
+
