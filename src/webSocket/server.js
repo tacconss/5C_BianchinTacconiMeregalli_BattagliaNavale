@@ -12,8 +12,9 @@ const PORT = 3001;
 app.use("/", express.static(path.join(__dirname, "..")));
 app.use("/node_modules", express.static(path.join(process.cwd(), "node_modules")));
 
+//su http://localhost:${PORT}/pages/index.html
 server.listen(PORT, () => {
-    console.log(`Server attivo su http://localhost:${PORT}/pages/login.html`);
+    console.log(`Server attivo`);
 });
 
 
