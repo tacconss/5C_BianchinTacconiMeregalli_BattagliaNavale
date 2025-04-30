@@ -1,4 +1,5 @@
 import { socket } from "../webSocket/socket.js";
+import { drawShip } from "../components/nave.js";
 
 
 export const generatePartitaComponent = (parentElement, avversario) => {

@@ -1,35 +1,6 @@
-/*import io from "/node_modules/socket.io/client-dist/socket.io.esm.min.js"
- import { updatePlayerList, updateGameList } from "../components/home.js";
- 
- const socket = io();
- const nameModal = document.getElementById("name-modal");
- const backdrop = document.getElementById("modal-backdrop");
- const gameContainer = document.getElementById("game-container");
- 
- document.getElementById("join-button").onclick = function () {
-   const nameInput = document.getElementById("name-input");
-   const username = nameInput.value.trim();
-   if (username !== "") {
-     socket.emit("join", username);
-   }
- };
- 
- 
- socket.on("join_error", (message) => {
-   alert(message);
- });
- 
- socket.on("list", (users) => {
-   updatePlayerList(users.map(u => ({ name: u.name })));
-   updateGameList(["Game 1 (P1 vs P2)", "Game 2 (P3 vs P4)"]);
-   nameModal.classList.remove("show");
-   backdrop.classList.remove("show");
-   gameContainer.style.display = "block";
- });
- */
- import { socket } from "./socket.js";
-import { updatePlayerList, updateGameList } from "../components/home.js";
+import { socket } from "./socket.js";
 import { generateInviteComponent } from "../components/invite.js";
+
 const savedUsername = sessionStorage.getItem("username");
 if (savedUsername) {
     socket.emit("join", savedUsername);
@@ -48,24 +19,34 @@ const inviteInput = document.getElementById("invite-input");
 
 const inviteComponent = generateInviteComponent(gameContainer, socket);
 
+// ✅ Funzioni spostate da home.js
+function updatePlayerList(users) {
+  let html = "";
+  for (let i = 0; i < users.length; i++) {
+    const stato = users[i].playing ? "in partita" : "libero";
+    html += `<li>${users[i].name} - <span>${stato}</span></li>`;
+  }
+  document.getElementById("player-list").innerHTML = html;
+}
+
+function updateGameList(games = []) {
+  let html = "";
+  for (let i = 0; i < games.length; i++) {
+    html += "<li>" + games[i] + "</li>";
+  }
+  document.getElementById("game-list").innerHTML = html;
+}
+
 // Evento per entrare nel gioco
 joinButton.onclick = () => {
   const username = nameInput.value.trim();
   if (username !== "") {
-      sessionStorage.setItem("username", username); 
-      socket.emit("join", username);
+    sessionStorage.setItem("username", username);
+    socket.emit("join", username);
   }
 };
 
-/*Evento per inviare un invito
-inviteButton.onclick = () => {
-    const target = inviteInput.value.trim();
-    const liList = document.querySelectorAll("#player-list li");
-    if (target !== "") {
-        socket.emit("invia_invito", { destinatario: target });
-    }
-};
-*/
+// Invio invito
 inviteButton.onclick = () => {
   const target = inviteInput.value.trim();
   const liList = document.querySelectorAll("#player-list li");
@@ -88,32 +69,29 @@ inviteButton.onclick = () => {
 
 // Ricezione errori
 socket.on("join_error", (message) => {
-    alert(message);
+  alert(message);
 });
 
 // Dopo join riuscito
 socket.on("list", (users) => {
   console.log("Lista aggiornata ricevuta:", users);
-    //updatePlayerList(users.map(u => ({ name: u.name })));
-    updatePlayerList(users.map(u => ({ name: u.name, playing: u.playing })));
-    updateGameList(["Game 1 (P1 vs P2)", "Game 2 (P3 vs P4)"]);
+  updatePlayerList(users.map(u => ({ name: u.name, playing: u.playing })));
+  updateGameList(["Game 1 (P1 vs P2)", "Game 2 (P3 vs P4)"]);
 
-    nameModal.classList.remove("show");
-    backdrop.classList.remove("show");
-    gameContainer.style.display = "block";
-    inviteContainer.style.display = "block";
-    inviteSection.style.display = "block";
+  nameModal.classList.remove("show");
+  backdrop.classList.remove("show");
+  gameContainer.style.display = "block";
+  inviteContainer.style.display = "block";
+  inviteSection.style.display = "block";
 });
 
 // Inviti in entrata/uscita
-//provvisoriamente inseriti gli alert per testare il funzionamento, previsto poi 
-//uno spazio specifico per errori o messaggi di stato
 socket.on("ricevi_invito", ({ mittente }) => {
-    inviteComponent.mostraInvito(mittente);
+  inviteComponent.mostraInvito(mittente);
 });
 
 socket.on("invito_error", (msg) => {
-    alert("Errore invito: " + msg);
+  alert("Errore invito: " + msg);
 });
 
 socket.on("avvia_partita", ({ avversario, idPartita }) => {
@@ -123,5 +101,5 @@ socket.on("avvia_partita", ({ avversario, idPartita }) => {
 });
 
 socket.on("invito_rifiutato", ({ da }) => {
-    alert(`${da} ha rifiutato il tuo invito.`);
+  alert(`${da} ha rifiutato il tuo invito.`);
 });
