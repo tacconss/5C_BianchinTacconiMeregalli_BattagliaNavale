@@ -1,27 +1,13 @@
-export const generateGiocatoreComponent = (parentElement) => {
-    let username; /* preso da db*/
-    let passwordHash/* preso da db*/
-    let stato;/*se sta giocando o è libero*/
-    
-
+export function generateGiocatoreComponent(nome, stato) {
     return {
-        registra: () => {
-            /*per registrarsi*/
-        },
-
-        login: () => {
-            /*per loggarsi*/
-        },
-
-        logout: () => {
-        /*per uscire*/
-        },
-
-        sfida: (/*istanza di giocatore*/) => {
-        /*logica per lanciare la sfida ad un altro giocatore*/
-        },
-
-        abbandonaPartita:(/*istanza di partita*/) =>{
-        }
+      renderHTML: function () {
+        return `
+          <li>
+            ${nome} - ${stato}
+            ${stato === "libero" ? `<button class="invite-button" data-nome="${nome}">Invita</button>` : ""}
+          </li>
+        `;
+      }
     };
-};
+  }
+  
