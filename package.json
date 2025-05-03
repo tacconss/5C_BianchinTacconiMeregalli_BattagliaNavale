@@ -2,9 +2,9 @@
   "name": "progettobattaglianavale_tacconi_bianchin_meregalli",
   "version": "1.0.0",
   "description": "Progetto chat con Express e Socket.IO",
-  "main": "src/webSocket/server.js",
+  "main": "public/webSocket/server.js",
   "scripts": {
-    "start": "concurrently \"node db.js\" \"node src/webSocket/server.js\""
+    "start": "concurrently \"node db.js\" \"node public/webSocket/server.js\""
   },
   "repository": {
     "type": "git",
