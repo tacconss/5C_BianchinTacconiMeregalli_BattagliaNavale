@@ -133,7 +133,7 @@
   }
   
   // ============ AVVIO SERVER ============
-  const PORT = 3000;
+  const PORT = 5050;
   app.listen(PORT, () => {
     console.log(`API server attivo su http://localhost:${PORT}`);
   });
