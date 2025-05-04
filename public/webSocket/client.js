@@ -1,7 +1,7 @@
-
- import { socket } from "./socket.js";
-import { updatePlayerList, updateGameList } from "../components/home.js";
+import { socket } from "./socket.js";
 import { generateInviteComponent } from "../components/invite.js";
+import { generateGiocatoreComponent } from "../components/giocatore.js";
+
 const savedUsername = sessionStorage.getItem("username");
 if (savedUsername) {
     socket.emit("join", savedUsername);
@@ -14,78 +14,90 @@ const inviteContainer = document.getElementById("invite-container");
 const inviteSection = document.getElementById("invite-section");
 
 const joinButton = document.getElementById("join-button");
-const inviteButton = document.getElementById("invite-button");
 const nameInput = document.getElementById("name-input");
-const inviteInput = document.getElementById("invite-input");
 
 const inviteComponent = generateInviteComponent(gameContainer, socket);
 
-// Evento per entrare nel gioco
+function updatePlayerList(users) {
+  let html = "";
+  const currentUser = sessionStorage.getItem("username");
+
+  users.forEach(user => {
+    if (user.name !== currentUser) {
+      const stato = user.playing ? "in partita" : "libero";
+      const comp = generateGiocatoreComponent(user.name, stato);
+      html += comp.renderHTML();
+    }
+  });
+
+  const list = document.getElementById("player-list");
+  list.innerHTML = html;
+
+  const buttons = list.querySelectorAll(".invite-button");
+  buttons.forEach(button => {
+    const nome = button.dataset.nome;
+    button.onclick = () => inviaInvito(nome);
+  });
+}
+
+function updateGameList(games = []) {
+  let html = "";
+  games.forEach(g => html += `<li>${g}</li>`);
+  document.getElementById("game-list").innerHTML = html;
+}
+
 joinButton.onclick = () => {
-  const username = nameInput.value.trim();
+  const username = document.getElementById("name-input").value.trim();
   if (username !== "") {
-      sessionStorage.setItem("username", username); 
-      socket.emit("join", username);
+    sessionStorage.setItem("username", username);
+    socket.emit("join", username);
   }
 };
 
-/*Evento per inviare un invito
-inviteButton.onclick = () => {
-    const target = inviteInput.value.trim();
-    const liList = document.querySelectorAll("#player-list li");
-    if (target !== "") {
-        socket.emit("invia_invito", { destinatario: target });
-    }
-};
-*/
-inviteButton.onclick = () => {
-  const target = inviteInput.value.trim();
+function inviaInvito(nomeDestinatario) {
+  if (!nomeDestinatario) return;
+
   const liList = document.querySelectorAll("#player-list li");
+  let inPartita = false;
 
-  // Controlla se il giocatore è in partita
-  for (let i = 0; i < liList.length; i++) {
-    const li = liList[i];
-    if (li.textContent.indexOf(target) === 0) {
-      if (li.textContent.indexOf("in partita") !== -1) {
-        alert(`${target} è attualmente in partita.`);
-        return;
-      }
+  liList.forEach(li => {
+    const testo = li.innerText.trim();
+    const previsto = `${nomeDestinatario} - in partita`;
+    if (testo === previsto) {
+      inPartita = true;
     }
+  });
+
+  if (inPartita) {
+    alert(`${nomeDestinatario} è attualmente in partita.`);
+    return;
   }
 
-  if (target !== "") {
-    socket.emit("invia_invito", { destinatario: target });
-  }
-};
+  socket.emit("invia_invito", { destinatario: nomeDestinatario });
+}
 
-// Ricezione errori
 socket.on("join_error", (message) => {
-    alert(message);
+  alert(message);
 });
 
-// Dopo join riuscito
 socket.on("list", (users) => {
   console.log("Lista aggiornata ricevuta:", users);
-    //updatePlayerList(users.map(u => ({ name: u.name })));
-    updatePlayerList(users.map(u => ({ name: u.name, playing: u.playing })));
-    updateGameList(["Game 1 (P1 vs P2)", "Game 2 (P3 vs P4)"]);
+  updatePlayerList(users.map(u => ({ name: u.name, playing: u.playing })));
+  updateGameList(["Game 1 (P1 vs P2)", "Game 2 (P3 vs P4)"]);
 
-    nameModal.classList.remove("show");
-    backdrop.classList.remove("show");
-    gameContainer.style.display = "block";
-    inviteContainer.style.display = "block";
-    inviteSection.style.display = "block";
+  nameModal.classList.remove("show");
+  backdrop.classList.remove("show");
+  gameContainer.style.display = "block";
+  inviteContainer.style.display = "block";
+  if (inviteSection) inviteSection.style.display = "block";
 });
 
-// Inviti in entrata/uscita
-//provvisoriamente inseriti gli alert per testare il funzionamento, previsto poi 
-//uno spazio specifico per errori o messaggi di stato
 socket.on("ricevi_invito", ({ mittente }) => {
-    inviteComponent.mostraInvito(mittente);
+  inviteComponent.mostraInvito(mittente);
 });
 
 socket.on("invito_error", (msg) => {
-    alert("Errore invito: " + msg);
+  alert("Errore invito: " + msg);
 });
 
 socket.on("avvia_partita", ({ avversario, idPartita }) => {
@@ -95,5 +107,5 @@ socket.on("avvia_partita", ({ avversario, idPartita }) => {
 });
 
 socket.on("invito_rifiutato", ({ da }) => {
-    alert(`${da} ha rifiutato il tuo invito.`);
+  alert(`${da} ha rifiutato il tuo invito.`);
 });

@@ -1,16 +1,22 @@
-export const generateShipComponent = (parentElement) => {
-    let tipo;
-    let dimensione;
-    let partiColpite;
-    let posizioe=[/*istanza di coordinate*/]; /*array di coordinate*/
-
-    return {
-        colpisci: () => {
-            return $boolean;/*se la nave è colpita o meno*/
-        },
-
-        isAffondata: () => {
-            return $boolean;/*se la nave è affondata o meno*/ 
-        }
+export const drawShip = (ctx, tipo, x, y, cellSize) => {
+    const dimensioni = {
+        'Portaerei': 5,
+        'Corazzata': 4,
+        'Incrociatore': 3,
+        'Sottomarino': 3,
+        'Cacciatorpediniere': 2
     };
+
+    const lunghezza = dimensioni[tipo] * cellSize;
+
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + lunghezza, y + cellSize / 2);
+    ctx.lineTo(x, y + cellSize);
+    ctx.closePath();
+
+    ctx.fillStyle = "#555";
+    ctx.fill();
+    ctx.strokeStyle = "#000";
+    ctx.stroke();
 };
