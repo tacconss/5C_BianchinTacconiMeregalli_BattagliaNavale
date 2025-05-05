@@ -1,21 +1,13 @@
-function inviaInvito(nomeDestinatario) {
-  if (!nomeDestinatario) return;
-
-  const liList = document.querySelectorAll("#player-list li");
-  let inPartita = false;
-
-  liList.forEach(li => {
-    const testo = li.innerText.trim();
+export const inviteModel = {
+  isUtenteInPartita(nomeDestinatario) {
+    const liList = document.querySelectorAll("#player-list li");
     const previsto = `${nomeDestinatario} - in partita`;
-    if (testo === previsto) {
-      inPartita = true;
+
+    for (let i = 0; i < liList.length; i++) {
+      if (liList[i].innerText.trim() === previsto) {
+        return true;
+      }
     }
-  });
-
-  if (inPartita) {
-    alert(`${nomeDestinatario} è attualmente in partita.`);
-    return;
+    return false;
   }
-
-  socket.emit("invia_invito", { destinatario: nomeDestinatario });
-}
+};

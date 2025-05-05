@@ -1,18 +1,29 @@
-export const generateGridComponent = (parentElement) => {
-    let dimensione;
-   // let casella=[/*istanza di coordinate x*/][/*istanza di coordinate y*/]; /*array di coordinate*/
-    let tutteNaviAffondate=false; /*se tutte le navi sono affondate è true sennò false*/
-    return {
-        posizionaNave: (/*istanza di nave, istanza di coordinate*/) => {
-            /*logica per posizionare la nave*/
-        },
+// components/view/grigliaView.js
 
-        riceviColpo: (/*istanza di coordinate*/) => {
-            return colpo.$risultato;/*returna il risultato del colpo presente nella classe colpo*/
-        },
-
-        getCasella: (/*istanza di coordinate*/) => {
-            return casella/*returna le  coordinate della casella*/
-        },
-    };
-};
+export const grigliaView = {
+    creaGriglia(idCanvas, righe = 10, colonne = 10, dimensioneCella = 40) {
+      const canvas = document.createElement("canvas");
+      canvas.width = colonne * dimensioneCella;
+      canvas.height = righe * dimensioneCella;
+      canvas.style.border = "2px solid black";
+      canvas.id = idCanvas;
+  
+      const ctx = canvas.getContext("2d");
+  
+      for (let i = 0; i <= righe; i++) {
+        ctx.moveTo(0, i * dimensioneCella);
+        ctx.lineTo(canvas.width, i * dimensioneCella);
+      }
+  
+      for (let j = 0; j <= colonne; j++) {
+        ctx.moveTo(j * dimensioneCella, 0);
+        ctx.lineTo(j * dimensioneCella, canvas.height);
+      }
+  
+      ctx.strokeStyle = "#000";
+      ctx.stroke();
+  
+      return canvas;
+    }
+  };
+  
