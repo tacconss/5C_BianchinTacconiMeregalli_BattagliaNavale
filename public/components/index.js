@@ -1,4 +1,4 @@
-import { generateLoginComponent } from './components/formLogin.js';
+import { generateLoginComponent } from './model/formLogin.js';
 
 let loginComponent;
 

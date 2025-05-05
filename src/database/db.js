@@ -6,7 +6,7 @@
   const bcrypt = require("bcrypt");
   
   const conf = JSON.parse(fs.readFileSync("conf.json"));
-  conf.ssl.ca = fs.readFileSync(__dirname + "/ca.pem");
+  conf.ssl.ca = fs.readFileSync(__dirname + "../../../ca.pem");
   
   const connection = mysql.createConnection(conf);
   const app = express();
@@ -19,7 +19,7 @@
   app.use("/pages", express.static(path.join(__dirname, "public", "pages")));
 
 
-  app.get("/", (req, res) => {
+  app.get("../../../", (req, res) => {
     res.sendFile(path.resolve(__dirname, "public", "pages", "index.html"), (err) => {
       if (err) {
         console.error("Errore nel caricare il file:", err);

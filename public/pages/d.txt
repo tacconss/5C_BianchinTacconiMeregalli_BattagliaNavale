@@ -1,0 +1,1 @@
+rendere tutto 1 sola pagina html e toglierla dalla cartella SPA

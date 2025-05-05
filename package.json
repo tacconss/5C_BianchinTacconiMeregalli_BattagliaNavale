@@ -4,7 +4,7 @@
   "description": "Progetto chat con Express e Socket.IO",
   "main": "public/webSocket/server.js",
   "scripts": {
-    "start": "concurrently \"node db.js\" \"node public/webSocket/server.js\""
+    "start": "concurrently \"node src/database/db.js\" \"node src/middleware/server.js\""
   },
   "repository": {
     "type": "git",
