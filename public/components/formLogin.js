@@ -1,3 +1,4 @@
+import { handleLoginOrRegister } from "./registerLogin.js";
 
 export const generateLoginComponent = (parentElement) => {
   let isLogin = true;
@@ -19,54 +20,34 @@ export const generateLoginComponent = (parentElement) => {
     <div class="switch" id="toggleForm">Non hai un account? Registrati</div>
   `;
 
-  const renderFormLogin = () => {
+  const renderLogin = () => {
     parentElement.innerHTML = html;
 
-    document.getElementById("toggleForm").addEventListener("click", () => {
+    const toggle = document.getElementById("toggleForm");
+    const formTitle = document.getElementById("form-title");
+    const formButton = document.querySelector("#userForm button");
+    const userForm = document.getElementById("userForm");
+
+    toggle.onclick = () => {
       isLogin = !isLogin;
-      document.getElementById("form-title").textContent = isLogin ? "Login" : "Registrazione";
-      document.querySelector("#userForm button").textContent = isLogin ? "Accedi" : "Registrati";
-      document.getElementById("toggleForm").textContent = isLogin
+      formTitle.innerText = isLogin ? "Login" : "Registrazione";
+      formButton.innerText = isLogin ? "Accedi" : "Registrati";
+      toggle.innerText = isLogin
         ? "Non hai un account? Registrati"
         : "Hai già un account? Accedi";
-    });
+    };
 
-    document.getElementById("userForm").addEventListener("submit", async (e) => {
+    userForm.onsubmit = async (e) => {
       e.preventDefault();
-      const form = e.target;
-      const name = form.name.value;
-      const password = form.password.value;
+      const name = userForm.name.value;
+      const password = userForm.password.value;
 
-      try {
-        const endpoint = isLogin ? "/login" : "/register";
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, password }),
-        });
-
-        const data = await res.json();
-        if (data.result) {
-          alert(data.result);
-          if (!isLogin) {
-            document.getElementById("toggleForm").click();
-            form.reset();
-          } else {
-            // Login riuscito → redirect
-            window.location.href = location.origin.replace("5050", "5051") + "/pages/home.html";
-
-          }
-        } else {
-          alert(data.error || "Errore");
-        }
-      } catch (error) {
-        alert("Errore di rete o server");
-      }
-    });
+      await handleLoginOrRegister({ name, password, isLogin, form: userForm, toggle });
+    };
   };
 
   return {
-    build: () => {},
-    renderFormLogin
+    renderLogin,
+    renderRegister: renderLogin
   };
 };
