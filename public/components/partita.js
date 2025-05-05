@@ -1,4 +1,5 @@
-import { socket } from "../webSocket/socket.js"; 
+import { generateGridComponent } from "./griglia.js";
+import { socket } from "../webSocket/socket.js";
 
 export const generatePartitaComponent = (parentElement, avversario) => {
     let idPartita;
@@ -6,46 +7,20 @@ export const generatePartitaComponent = (parentElement, avversario) => {
     let giocatoreCorrente;
     let vincitore;
 
-    const creaGriglia = (idCanvas) => {
-        const canvas = document.createElement("canvas");
-        const dimensioneCella = 40;
-        const righe = 10;
-        const colonne = 10;
-        canvas.width = colonne * dimensioneCella;
-        canvas.height = righe * dimensioneCella;
-        canvas.style.border = "2px solid black";
-        canvas.id = idCanvas;
-
-        const ctx = canvas.getContext("2d");
-
-        for (let i = 0; i <= righe; i++) {
-            ctx.moveTo(0, i * dimensioneCella);
-            ctx.lineTo(canvas.width, i * dimensioneCella);
-        }
-
-        for (let j = 0; j <= colonne; j++) {
-            ctx.moveTo(j * dimensioneCella, 0);
-            ctx.lineTo(j * dimensioneCella, canvas.height);
-        }
-
-        ctx.strokeStyle = "#000";
-        ctx.stroke();
-
-        return canvas;
-    };
+    const gridComponent = generateGridComponent();
 
     const inizia = () => {
         const campoGioco = document.getElementById("campo-gioco");
 
         const containerGiocatore = document.createElement("div");
         const titolo1 = `<h2>Tua griglia</h2>`;
-        const grigliaGiocatore = creaGriglia("griglia-giocatore");
+        const grigliaGiocatore = gridComponent.creaGriglia("griglia-giocatore");
         containerGiocatore.innerHTML = titolo1;
         containerGiocatore.append(grigliaGiocatore);
 
         const containerAvversario = document.createElement("div");
         const titolo2 = `<h2>Griglia di ${avversario}</h2>`;
-        const grigliaAvversario = creaGriglia("griglia-avversario");
+        const grigliaAvversario = gridComponent.creaGriglia("griglia-avversario");
         containerAvversario.innerHTML = titolo2;
         containerAvversario.append(grigliaAvversario);
 
@@ -57,18 +32,10 @@ export const generatePartitaComponent = (parentElement, avversario) => {
     return {
         inizia,
         cambiaTurno: () => {},
-        registraColpo: () => {
-            return null;
-        },
-        verificaFinePartita: () => {
-            return false;
-        },
-        termina: () => {
-            return vincitore;
-        },
-        gestisciAbbandono: () => {
-            return vincitore;
-        }
+        registraColpo: () => null,
+        verificaFinePartita: () => false,
+        termina: () => vincitore,
+        gestisciAbbandono: () => vincitore
     };
 };
 
