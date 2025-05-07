@@ -1,3 +1,0 @@
-pubsub: fa comunicare i componenti
-middle: client server
-mettere le 3 socket

@@ -1,2 +1,0 @@
-pubsub: fa comunicare i componenti
-middle: client server
