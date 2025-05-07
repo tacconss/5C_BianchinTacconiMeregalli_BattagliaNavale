@@ -24,7 +24,7 @@
     "fs": "^0.0.1-security",
     "http": "^0.0.1-security",
     "io": "^1.5.3",
-    "mysql2": "^3.14.0",
+    "mysql2": "^3.14.1",
     "path": "^0.12.7",
     "server": "^0.0.3",
     "socket.io": "^4.8.1"
