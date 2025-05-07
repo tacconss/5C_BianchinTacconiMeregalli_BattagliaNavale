@@ -9,7 +9,7 @@ const server = http.createServer(app);
 const io = new Server(server);
 const PORT = 5051;
 
-app.use("/", express.static(path.join(__dirname, "..")));
+app.use("/", express.static(path.join(__dirname, "/public")));
 app.use("/node_modules", express.static(path.join(process.cwd(), "node_modules")));
 
 //su http://localhost:${PORT}/pages/index.html
