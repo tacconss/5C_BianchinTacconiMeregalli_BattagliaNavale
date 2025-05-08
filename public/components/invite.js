@@ -26,3 +26,4 @@ export const generateInviteComponent = (parentElement, socket) => {
         mostraInvito: renderInvite
     };
 };
+

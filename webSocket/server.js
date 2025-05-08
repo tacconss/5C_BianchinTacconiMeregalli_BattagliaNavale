@@ -1,0 +1,234 @@
+const express = require("express");
+const bodyParser = require("body-parser");
+const fs = require("fs");
+const path = require("path");
+const mysql = require("mysql2");
+const bcrypt = require("bcrypt");
+const http = require("http");
+const { Server } = require("socket.io");
+const dbAccess = require("../db.js");
+
+const conf = JSON.parse(fs.readFileSync("conf.json"));
+conf.ssl.ca = fs.readFileSync(path.join(process.cwd(),"ca.pem"));
+
+const connection = mysql.createConnection(conf);
+const app = express();
+const db = dbAccess(app);
+
+// Crea il server HTTP con Express
+const server = http.createServer(app);
+const io = new Server(server);
+
+// Impostazioni di Express
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use("/", express.static(path.join(process.cwd(), "public")));
+app.use("/node_modules", express.static(path.join(process.cwd(), "node_modules")));
+
+app.use("/pages", express.static(path.join(process.cwd(), "public/pages")));
+
+
+// ============ ROTTA REGISTRAZIONE ============
+app.post("/register", async (req, res) => {
+  const { name, password } = req.body;
+  if (!name || !password) return res.status(400).json({ error: "Campi mancanti" });
+
+  try {
+    const utenti = await executeQuery("SELECT * FROM Utenti WHERE NomeUtente = ?", [name]);
+    if (utenti.length > 0) return res.status(409).json({ error: "Utente già esistente" });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await insertUser({ name, password: hashedPassword });
+    res.json({ result: "Utente registrato con successo" });
+  } catch (err) {
+    console.error("Errore durante la registrazione:", err);
+    res.status(500).json({ error: "Errore durante la registrazione" });
+  }
+});
+
+// ============ API CRUD UTENTI ============
+app.post("/Utenti/add", (req, res) => {
+  const utente = req.body;
+  insertUser(utente).then(() => {
+    res.json({ result: "Ok" });
+  });
+});
+
+app.get("/Utenti", (req, res) => {
+  select().then(lista => {
+    res.json({ utenti: lista });
+  });
+});
+
+app.put("/Utenti/update", (req, res) => {
+  const utente = req.body;
+  update(utente).then(() => {
+    res.json({ result: "Ok" });
+  });
+});
+
+app.delete("/Utenti/:idUtenti", (req, res) => {
+  const id = req.params.idUtenti;
+  remove({ idUtenti: id }).then(() => {
+    res.json({ result: "Ok" });
+  });
+});
+
+// ============ FUNZIONI DB ============
+function executeQuery(sql, params = []) {
+  return new Promise((resolve, reject) => {
+    connection.query(sql, params, (err, result) => {
+      if (err) {
+        console.log("Errore query:", err);
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
+}
+
+function insertUser(utente) {
+  const sql = `INSERT INTO Utenti (NomeUtente, Password) VALUES (?, ?)`;
+  return executeQuery(sql, [utente.name, utente.password]);
+}
+
+function select() {
+  const sql = `SELECT idUtenti, NomeUtente, Password FROM Utenti`;
+  return executeQuery(sql);
+}
+
+function update(utente) {
+  const sql = `UPDATE Utenti SET Password = ? WHERE idUtenti = ?`;
+  return executeQuery(sql, [utente.password, utente.idUtenti]);
+}
+
+function remove(utente) {
+  const sql = `DELETE FROM Utenti WHERE idUtenti = ?`;
+  return executeQuery(sql, [utente.idUtenti]);
+}
+
+// ============ GESTIONE SOCKET.IO (WebSockets) ============
+const giocatoriConnessi = {};
+const statoGiocatori = {};
+
+io.on("connection", (socket) => {
+  console.log("Connesso:", socket.id);
+
+  socket.on("join", (username) => {
+    const values = Object.values(giocatoriConnessi);
+    const giaConnesso = values.includes(username);
+
+    giocatoriConnessi[socket.id] = username;
+
+    if (!(username in statoGiocatori)) {
+      statoGiocatori[username] = "libero";
+    } else {
+      console.log(`${username} già esistente con stato: ${statoGiocatori[username]}`);
+    }
+
+    aggiornaListaGiocatori();
+    console.log(`${username} si è unito.`);
+  });
+
+  socket.on("invia_invito", ({ destinatario }) => {
+    const mittente = giocatoriConnessi[socket.id];
+    const keys = Object.keys(giocatoriConnessi);
+    for (let i = 0; i < keys.length; i++) {
+      const sockId = keys[i];
+      const username = giocatoriConnessi[sockId];
+      if (username === destinatario) {
+        if (statoGiocatori[username] === "in_partita") {
+          socket.emit("invito_error", `${destinatario} è già in partita.`);
+          return;
+        }
+
+        io.to(sockId).emit("ricevi_invito", { mittente });
+        return;
+      }
+    }
+
+    socket.emit("invito_error", "Giocatore non trovato.");
+  });
+
+  socket.on("accetta_invito", ({ mittente }) => {
+    const ricevente = giocatoriConnessi[socket.id];
+    let mittenteSocketId = null;
+
+    const keys = Object.keys(giocatoriConnessi);
+    for (let i = 0; i < keys.length; i++) {
+      const sockId = keys[i];
+      const username = giocatoriConnessi[sockId];
+      if (username === mittente) {
+        mittenteSocketId = sockId;
+        break;
+      }
+    }
+
+    if (mittenteSocketId && ricevente && statoGiocatori[mittente] === "libero" && statoGiocatori[ricevente] === "libero") {
+      statoGiocatori[mittente] = "in_partita";
+      statoGiocatori[ricevente] = "in_partita";
+
+      aggiornaListaGiocatori();
+
+      const idPartita = `${mittente}-${ricevente}-${Date.now()}`;
+
+      io.to(mittenteSocketId).emit("avvia_partita", { avversario: ricevente, idPartita });
+      io.to(socket.id).emit("avvia_partita", { avversario: mittente, idPartita });
+
+      aggiornaListaGiocatori();
+    } else {
+      socket.emit("invito_error", "Uno dei giocatori non è disponibile.");
+    }
+  });
+
+  socket.on("rifiuta_invito", ({ mittente }) => {
+    const keys = Object.keys(giocatoriConnessi);
+    for (let i = 0; i < keys.length; i++) {
+      const sockId = keys[i];
+      const username = giocatoriConnessi[sockId];
+      if (username === mittente) {
+        const nomeRifiutante = giocatoriConnessi[socket.id];
+        io.to(sockId).emit("invito_rifiutato", { da: nomeRifiutante });
+        break;
+      }
+    }
+  });
+
+  socket.on("fine_partita", ({ giocatore1, giocatore2 }) => {
+    if (giocatore1) statoGiocatori[giocatore1] = "libero";
+    if (giocatore2) statoGiocatori[giocatore2] = "libero";
+
+    aggiornaListaGiocatori();
+  });
+
+  socket.on("disconnect", () => {
+    const username = giocatoriConnessi[socket.id];
+    if (username) {
+      delete giocatoriConnessi[socket.id];
+
+      if (statoGiocatori[username] !== "in_partita") {
+        statoGiocatori[username] = "libero";
+      }
+
+      aggiornaListaGiocatori();
+      console.log(`${username} disconnesso.`);
+    }
+  });
+
+  function aggiornaListaGiocatori() {
+    const lista = [];
+    const keys = Object.keys(statoGiocatori);
+    for (let i = 0; i < keys.length; i++) {
+      const username = keys[i];
+      const stato = statoGiocatori[username];
+      lista.push({ name: username, playing: stato === "in_partita" });
+    }
+    io.emit("list", lista);
+  }
+});
+
+
+server.listen(5050, () => {
+  console.log(`API`);
+});

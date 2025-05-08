@@ -2,3 +2,4 @@ conf.json
 package-lock.json
 node_modules
 ca.pem
+.vscode
