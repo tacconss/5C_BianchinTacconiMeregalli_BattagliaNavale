@@ -17,7 +17,8 @@ export const handleLoginOrRegister = async ({ name, password, isLogin, form, tog
           form.reset();
         } else {
           // login riuscito
-          window.location.href = location.origin.replace("5050", "5051") + "/pages/home.html";
+          window.location.href = "/pages/home.html";
+          //window.location.href = "/public/pages/home.html";
         }
       } else {
         alert(data.error || "Errore");

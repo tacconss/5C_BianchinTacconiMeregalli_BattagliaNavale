@@ -1,5 +1,4 @@
-  const express = require("express");
-  const bodyParser = require("body-parser");
+  module.exports = function createDB(app) {
   const fs = require("fs");
   const path = require("path");
   const mysql = require("mysql2");
@@ -9,25 +8,12 @@
   conf.ssl.ca = fs.readFileSync(__dirname + "/ca.pem");
   
   const connection = mysql.createConnection(conf);
-  const app = express();
-  
-  app.use(bodyParser.json());
-  app.use(bodyParser.urlencoded({ extended: true }));
 
-  //app.use("/", express.static(path.join(__dirname, "public")));
-  app.use("/public", express.static(path.join(__dirname, "public")));
-  app.use("/pages", express.static(path.join(__dirname, "public", "pages")));
+const bodyParser = require("body-parser");
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-  app.get("/", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "public", "pages", "index.html"), (err) => {
-      if (err) {
-        console.error("Errore nel caricare il file:", err);
-        res.status(500).send("Errore nel caricare la pagina");
-      }
-    });
-  });
-  
 
   
   
@@ -52,6 +38,7 @@
   
   // ============ ROTTA LOGIN ============
   app.post("/login", async (req, res) => {
+    console.log("Login request:", req.body);
     const { name, password } = req.body;
     if (!name || !password) return res.status(400).json({ error: "Campi mancanti" });
   
@@ -131,10 +118,4 @@
     const sql = `DELETE FROM Utenti WHERE idUtenti = ?`;
     return executeQuery(sql, [utente.idUtenti]);
   }
-  
-  // ============ AVVIO SERVER ============
-  const PORT = 5050;
-  app.listen(PORT, () => {
-    console.log(`API server attivo su http://localhost:${PORT}`);
-  });
-  
+}

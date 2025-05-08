@@ -50,7 +50,7 @@ if (!avversario) {
 }
 */
 import { generateGridComponent } from "./griglia.js";
-import { socket } from "../webSocket/socket.js";
+import { socket } from "./socket.js";
 import { generateTurno } from "./turno.js";
 
 
