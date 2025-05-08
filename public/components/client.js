@@ -1,4 +1,4 @@
-import { socket } from "./socket.js";
+/*import { socket } from "./socket.js";
 import { generateInviteComponent } from "../components/invite.js";
 import { generateGiocatoreComponent } from "../components/giocatore.js";
 
@@ -109,3 +109,90 @@ socket.on("avvia_partita", ({ avversario, idPartita }) => {
 socket.on("invito_rifiutato", ({ da }) => {
   alert(`${da} ha rifiutato il tuo invito.`);
 });
+*/
+import { socket } from "./socket.js";
+import { generateInviteComponent } from "../components/invite.js";
+import { generateGiocatoreComponent } from "../components/giocatore.js";
+
+const nameModal       = document.getElementById("name-modal");
+const backdrop        = document.getElementById("modal-backdrop");
+const gameContainer   = document.getElementById("game-container");
+const inviteContainer = document.getElementById("invite-container");
+const inviteSection   = document.getElementById("invite-section");
+const joinButton      = document.getElementById("join-button");
+const nameInput       = document.getElementById("name-input");
+const logoutButton    = document.getElementById("logout-button");
+const playerList      = document.getElementById("player-list");
+const gameList        = document.getElementById("game-list");
+
+const inviteComponent = generateInviteComponent(gameContainer, socket);
+
+logoutButton.onclick = () => {
+  socket.disconnect();
+  sessionStorage.clear();
+  nameModal.classList.add("show");
+  backdrop.classList.add("show");
+  gameContainer.style.display = "none";
+  inviteContainer.style.display = "none";
+  inviteSection && (inviteSection.style.display = "none");
+};
+
+const savedUsername = sessionStorage.getItem("username");
+if (savedUsername) socket.emit("join", savedUsername);
+
+joinButton.onclick = () => {
+  const username = nameInput.value.trim();
+  if (!username) return;
+  sessionStorage.setItem("username", username);
+  socket.emit("join", username);
+};
+
+socket.on("list", users => {
+  let html = "";
+  const me = sessionStorage.getItem("username");
+  users.forEach(u => {
+    if (u.name === me) return;
+    const stato = u.playing ? "in partita" : "libero";
+    html += generateGiocatoreComponent(u.name, stato).renderHTML();
+  });
+  playerList.innerHTML = html;
+  playerList.querySelectorAll(".invite-button").forEach(btn => {
+    btn.onclick = () => socket.emit("invia_invito", { destinatario: btn.dataset.nome });
+  });
+
+  nameModal.classList.remove("show");
+  backdrop.classList.remove("show");
+  gameContainer.style.display = "block";
+  inviteContainer.style.display = "block";
+  inviteSection && (inviteSection.style.display = "block");
+});
+
+socket.on("lista_partite", ids => {
+  let html = "";
+  const me = sessionStorage.getItem("username");
+  ids.forEach(id => {
+    const mine = id.startsWith(me + "-") || id.endsWith("-" + me);
+    html += `<li>${id}${mine?` <button class="leave-game" data-game="${id}">Abbandona</button>`:""}</li>`;
+  });
+  gameList.innerHTML = html;
+  gameList.querySelectorAll(".leave-game").forEach(btn => {
+    btn.onclick = () => {
+      socket.emit("abbandona_partita", {
+        idPartita: btn.dataset.game,
+        giocatoreCheAbbandona: sessionStorage.getItem("username")
+      });
+    };
+  });
+});
+
+socket.on("ricevi_invito", ({ mittente }) => inviteComponent.mostraInvito(mittente));
+socket.on("invito_error", msg => alert("Errore invito: " + msg));
+socket.on("invito_rifiutato", ({ da }) => alert(`${da} ha rifiutato l'invito.`));
+
+socket.on("avvia_partita", ({ avversario, idPartita }) => {
+  sessionStorage.setItem("avversario", avversario);
+  sessionStorage.setItem("idPartita", idPartita);
+  window.location.href = "/pages/partita.html";
+});
+
+

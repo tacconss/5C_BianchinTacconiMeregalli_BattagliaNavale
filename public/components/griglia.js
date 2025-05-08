@@ -8,29 +8,25 @@ export const generateGridComponent = () => {
     );
 
     return {
-        creaGriglia: (idCanvas) => {
-            const canvas = document.createElement("canvas");
-            canvas.width = colonne * dimensioneCella;
-            canvas.height = righe * dimensioneCella;
-            canvas.style.border = "2px solid black";
-            canvas.id = idCanvas;
+        creaGrigliaHTML: (idCanvas, width, height) => {
+            return `<canvas id="${idCanvas}" width="${width}" height="${height}" style="border:2px solid black"></canvas>`;
+        },
 
-            const ctx = canvas.getContext("2d");
-
+        initializeCanvasGrid: (idCanvas, righe, colonne, cellSize) => {
+            const canvas = document.getElementById(idCanvas);
+            const ctx = canvas.getContext('2d');
             for (let i = 0; i <= righe; i++) {
-                ctx.moveTo(0, i * dimensioneCella);
-                ctx.lineTo(canvas.width, i * dimensioneCella);
+                ctx.beginPath();
+                ctx.moveTo(0, i * cellSize);
+                ctx.lineTo(colonne * cellSize, i * cellSize);
+                ctx.stroke();
             }
-
             for (let j = 0; j <= colonne; j++) {
-                ctx.moveTo(j * dimensioneCella, 0);
-                ctx.lineTo(j * dimensioneCella, canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(j * cellSize, 0);
+                ctx.lineTo(j * cellSize, righe * cellSize);
+                ctx.stroke();
             }
-
-            ctx.strokeStyle = "#000";
-            ctx.stroke();
-
-            return canvas;
         },
 
         posizionaNave: (lunghezza = 3) => {
@@ -58,20 +54,10 @@ export const generateGridComponent = () => {
                 }
             }
 
-            // Marca le celle come occupate
-            for (const { x, y } of coordinate) {
-                caselle[y][x].occupata = true;
-            }
-
+            coordinate.forEach(({ x, y }) => caselle[y][x].occupata = true);
             return coordinate;
         },
 
-        riceviColpo: () => {
-            return colpo.$risultato;
-        },
-
-        getCasella: () => {
-            return caselle;
-        },
+        getCaselle: () => caselle
     };
 };

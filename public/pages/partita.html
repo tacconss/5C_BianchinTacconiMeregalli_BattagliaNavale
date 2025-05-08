@@ -7,12 +7,16 @@
 </head>
 <body>
     <div id="partita-container">
-        <h1 >Naval Battle</h1>
+        <h1>Naval Battle</h1>
         <div id="turno-info"></div>
         <div id="campo-gioco" class="container">
         </div>
+        <div>
+            <button id="abbandonaBtn">Abbandona</button>
+        </div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script type="module" src="/components/partita.js"></script>
 </body>
 </html>

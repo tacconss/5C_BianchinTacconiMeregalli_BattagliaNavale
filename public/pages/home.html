@@ -23,40 +23,31 @@
     </div>
   </div> 
 
-  <!-- Sfondo del modal -->
   <div id="modal-backdrop" class="modal-backdrop show"></div>
 
-  <!-- Contenitore degli inviti -->
   <div id="invite-container" style="display: none;"></div>
 
-  <!-- Container principale del gioco -->
   <div id="game-container" class="game-container" style="display: none;">
     <h1>Naval Battle</h1>
-    <div class="content">
 
-      <!-- Partite disponibili -->
+    <button id="logout-button" class="logout-btn">Esci</button>
+
+    <div class="content">
       <div class="section">
         <h5>Partite</h5>
         <ul id="game-list"></ul>
       </div>
-
-      <!-- Logo -->
       <div class="section">
         <img src="/assets/logo.png" alt="logo" />
       </div>
-
-      <!-- Lista giocatori -->
       <div class="section">
         <h5>Giocatori</h5>
         <ul id="player-list"></ul>
       </div>
-
     </div>
   </div>
 
-  <!-- Script principali -->
+  <script src="/socket.io/socket.io.js"></script>
   <script src="/components/client.js" type="module"></script>
 </body>
 </html>
-
-
