@@ -20,27 +20,24 @@ export const generatePartitaComponent = () => {
   const cellSize = 40, rows = 10, cols = 10;
   const grid = generateGridComponent();
 
-  // Generazione HTML
   campoGioco.innerHTML = `
     <div class="griglia-container">
       <h2>La Tua Griglia</h2>
-      ${grid.creaGrigliaHTML("griglia-giocatore", cols*cellSize, rows*cellSize)}
+      ${grid.creaGrigliaHTML("griglia-giocatore", cols * cellSize, rows * cellSize)}
     </div>
     <div class="griglia-container">
       <h2>Griglia di ${avversario}</h2>
-      ${grid.creaGrigliaHTML("griglia-avversario", cols*cellSize, rows*cellSize)}
+      ${grid.creaGrigliaHTML("griglia-avversario", cols * cellSize, rows * cellSize)}
     </div>
   `;
 
-  // Inizializzazione griglie
   grid.initializeCanvasGrid("griglia-giocatore", rows, cols, cellSize);
   grid.initializeCanvasGrid("griglia-avversario", rows, cols, cellSize);
 
-  // Posizionamento navi giocatore
   const canvasGiocatore = document.getElementById("griglia-giocatore");
   const ctxGiocatore = canvasGiocatore.getContext("2d");
- 
-  const shipColors = {5: 'red', 4: 'pink', 3: 'green', 2: 'orange', 1: 'purple'};
+
+  const shipColors = { 5: 'red', 4: 'pink', 3: 'green', 2: 'orange', 1: 'purple' };
   const navi = [5, 4, 3, 2, 1, 1];
   const naviPosizionate = [];
 
@@ -51,21 +48,20 @@ export const generatePartitaComponent = () => {
     const coordinate = grid.posizionaNave(lunghezza);
     naviPosizionate.push({ coordinate, lunghezza });
     ctxGiocatore.fillStyle = shipColors[lunghezza];
-    coordinate.forEach(({x, y}) => {
-      ctxGiocatore.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-      ctxGiocatore.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+    coordinate.forEach(({ x, y }) => {
+      ctxGiocatore.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+      ctxGiocatore.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
     });
   });
 
-  // GESTIONE CLICK (PARTE CORRETTA)
   const canvasAvv = document.getElementById("griglia-avversario");
- 
+
   const handleClick = (x, y) => {
     console.log(`Click su x:${x}, y:${y}`);
     const ctxAvv = canvasAvv.getContext("2d");
-    const cellData = ctxAvv.getImageData(x*cellSize, y*cellSize, 1, 1).data;
-   
-    if (cellData[3] !== 0) { // Se cella già colpita
+    const cellData = ctxAvv.getImageData(x * cellSize, y * cellSize, 1, 1).data;
+
+    if (cellData[3] !== 0) {
       console.log("Cella già colpita!");
       return;
     }
@@ -73,23 +69,22 @@ export const generatePartitaComponent = () => {
     socket.emit("colpo", {
       idPartita,
       giocatoreAttaccante: username,
-      coordinate: {x, y}
+      coordinate: { x, y }
     });
     turnoInfo.innerText = `In attesa di ${avversario}...`;
   };
 
-  // MODIFICA IMPORTANTE: Aggiunta gestione diretta del click
-  canvasAvv.addEventListener('click', (e) => {
+  canvasAvv.onclick = (e) => {
     const rect = canvasAvv.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) / cellSize);
     const y = Math.floor((e.clientY - rect.top) / cellSize);
-   
+
     if (x >= 0 && x < cols && y >= 0 && y < rows) {
       handleClick(x, y);
     }
-  });
+  };
 
-  // Resto del codice rimane uguale...
+
   abbandonaBtn.onclick = () => {
     socket.emit("abbandona_partita", {
       idPartita,
@@ -98,8 +93,12 @@ export const generatePartitaComponent = () => {
     window.location.href = "/pages/home.html";
   };
 
-  socket.on("avversario_abbandona", () => {
+  socket.on("conferma_abbandono", () => {
     window.location.href = "/pages/home.html";
+  });
+
+  socket.on("vittoria_per_abbandono", () => {
+    window.location.href = "/pages/win.html";
   });
 
   socket.on("cambio_turno", ({ prossimoGiocatore }) => {
@@ -110,30 +109,37 @@ export const generatePartitaComponent = () => {
     }
   });
 
-  // Modifica la parte del socket.on("risultato_colpo") in partita.js
-socket.on("risultato_colpo", ({x, y, tipoRisultato, giocatoreColpito, naveAffondataInfo}) => {
-  const ctx = document.getElementById(
-    giocatoreColpito === username ? "griglia-giocatore" : "griglia-avversario"
-  ).getContext("2d");
+  socket.on("risultato_colpo", ({ x, y, tipoRisultato, giocatoreColpito, naveAffondataInfo }) => {
+    const ctx = document.getElementById(
+      giocatoreColpito === username ? "griglia-giocatore" : "griglia-avversario"
+    ).getContext("2d");
 
-  if (tipoRisultato === "colpito") {
-    ctx.fillStyle = 'green'; // Colore verde per i colpi a segno
-    ctx.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-    ctx.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-  }
-  else if (tipoRisultato === "mancato") {
-    ctx.fillStyle = "red"; // Colore rosso per i colpi mancati
-    ctx.beginPath();
-    ctx.arc(x*cellSize+cellSize/2, y*cellSize+cellSize/2, cellSize/4, 0, 2*Math.PI);
-    ctx.fill();
-  }
-  else if (tipoRisultato === "affondato") {
-    ctx.fillStyle = "darkgreen"; // Colore verde scuro per le navi affondate
-    naveAffondataInfo?.celle?.forEach(c => {
-      ctx.fillRect(c.x*cellSize+1, c.y*cellSize+1, cellSize-2, cellSize-2);
-    });
-  }
-});
+    if (tipoRisultato === "colpito") {
+      ctx.fillStyle = 'green'; 
+      ctx.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+      ctx.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+    }
+    else if (tipoRisultato === "mancato") {
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 4, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    else if (tipoRisultato === "affondato") {
+      ctx.fillStyle = "darkgreen"; 
+      if (naveAffondataInfo && naveAffondataInfo.celle) {
+        naveAffondataInfo.celle.forEach(c => {
+          ctx.fillRect(
+            c.x * cellSize + 1,
+            c.y * cellSize + 1,
+            cellSize - 2,
+            cellSize - 2
+          );
+        });
+      }
+    }
+    
+  });
 };
 
 if (document.getElementById("partita-container")) {

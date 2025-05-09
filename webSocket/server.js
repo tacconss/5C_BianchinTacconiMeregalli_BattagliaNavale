@@ -15,11 +15,9 @@ const connection = mysql.createConnection(conf);
 const app = express();
 const db = dbAccess(app);
 
-// Crea il server HTTP con Express
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Impostazioni di Express
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(process.cwd(), "public")));
@@ -27,7 +25,6 @@ app.use("/node_modules", express.static(path.join(process.cwd(), "node_modules")
 app.use("/pages", express.static(path.join(process.cwd(), "public/pages")));
 
 
-// ============ ROTTA REGISTRAZIONE ============
 app.post("/register", async (req, res) => {
   const { name, password } = req.body;
   if (!name || !password) return res.status(400).json({ error: "Campi mancanti" });
@@ -45,7 +42,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// ============ API CRUD UTENTI ============
 app.post("/Utenti/add", (req, res) => {
   const utente = req.body;
   insertUser(utente).then(() => {
@@ -73,7 +69,6 @@ app.delete("/Utenti/:idUtenti", (req, res) => {
   });
 });
 
-// ============ FUNZIONI DB ============
 function executeQuery(sql, params = []) {
   return new Promise((resolve, reject) => {
     connection.query(sql, params, (err, result) => {
@@ -107,44 +102,48 @@ function remove(utente) {
   return executeQuery(sql, [utente.idUtenti]);
 }
 
-// ============ GESTIONE SOCKET.IO (WebSockets) ============
 const giocatoriConnessi = {};
 const statoGiocatori = {};
 const partiteInCorso = {};
 
 function emitAggiornaPartite() {
-  const listaPartite = Object.values(partiteInCorso).map(partita => `${partita.giocatore1} vs ${partita.giocatore2}`);
+  const listaPartite = {};
+  for (const id in partiteInCorso) {
+    const partita = partiteInCorso[id];
+    listaPartite[id] = `${partita.giocatore1} vs ${partita.giocatore2}`;
+  }
   io.emit("aggiorna_partite", listaPartite);
 }
+
+
 
 io.on("connection", (socket) => {
   console.log("Connesso:", socket.id);
 
   socket.on("join", (username) => {
-    // Se username già connesso con un altro socket, disconnetto il vecchio
-    for (const [sockId, user] of Object.entries(giocatoriConnessi)) {
-      if (user === username) {
+    for (const sockId in giocatoriConnessi) {
+      if (giocatoriConnessi[sockId] === username) {
         io.sockets.sockets.get(sockId)?.disconnect(true);
         delete giocatoriConnessi[sockId];
       }
     }
-
+  
     giocatoriConnessi[socket.id] = username;
-
+  
     if (!(username in statoGiocatori)) {
       statoGiocatori[username] = "libero";
     } else {
       console.log(`${username} già esistente con stato: ${statoGiocatori[username]}`);
     }
-
+  
     aggiornaListaGiocatori();
     console.log(`${username} si è unito.`);
   });
+  
 
   socket.on("invia_invito", ({ destinatario }) => {
     const mittente = giocatoriConnessi[socket.id];
-    const keys = Object.keys(giocatoriConnessi);
-    for (const sockId of keys) {
+    for (const sockId in giocatoriConnessi) {
       const user = giocatoriConnessi[sockId];
       if (user === destinatario) {
         if (statoGiocatori[user] === "in_partita") {
@@ -157,18 +156,20 @@ io.on("connection", (socket) => {
     }
     socket.emit("invito_error", "Giocatore non trovato.");
   });
+  
 
   socket.on("accetta_invito", ({ mittente }) => {
     const ricevente = giocatoriConnessi[socket.id];
     let mittenteSocketId = null;
-
-    for (const [sid, user] of Object.entries(giocatoriConnessi)) {
+  
+    for (const sid in giocatoriConnessi) {
+      const user = giocatoriConnessi[sid];
       if (user === mittente) {
         mittenteSocketId = sid;
         break;
       }
     }
-
+  
     if (
       mittenteSocketId &&
       ricevente &&
@@ -177,25 +178,26 @@ io.on("connection", (socket) => {
     ) {
       statoGiocatori[mittente] = "in_partita";
       statoGiocatori[ricevente] = "in_partita";
-
+  
       aggiornaListaGiocatori();
-
+  
       const idPartita = `${mittente}-${ricevente}-${Date.now()}`;
       partiteInCorso[idPartita] = { giocatore1: mittente, giocatore2: ricevente };
-      emitAggiornaPartite(); // Emetti l'aggiornamento della lista partite
-
+      emitAggiornaPartite(); 
+  
       io.to(mittenteSocketId).emit("avvia_partita", { avversario: ricevente, idPartita });
       io.to(socket.id).emit("avvia_partita", { avversario: mittente, idPartita });
       console.log(`Partita avviata tra ${mittente} e ${ricevente}, ID: ${idPartita}`);
-
+  
       aggiornaListaGiocatori();
     } else {
       socket.emit("invito_error", "Uno dei giocatori non è disponibile.");
     }
   });
-
+  
   socket.on("rifiuta_invito", ({ mittente }) => {
-    for (const [sid, user] of Object.entries(giocatoriConnessi)) {
+    for (const sid in giocatoriConnessi) {
+      const user = giocatoriConnessi[sid];
       if (user === mittente) {
         const nomeRifiutante = giocatoriConnessi[socket.id];
         io.to(sid).emit("invito_rifiutato", { da: nomeRifiutante });
@@ -207,45 +209,65 @@ io.on("connection", (socket) => {
   socket.on("fine_partita", ({ giocatore1, giocatore2 }) => {
     if (giocatore1) statoGiocatori[giocatore1] = "libero";
     if (giocatore2) statoGiocatori[giocatore2] = "libero";
-    const idPartitaDaEliminare = Object.keys(partiteInCorso).find(id =>
-      (partiteInCorso[id].giocatore1 === giocatore1 && partiteInCorso[id].giocatore2 === giocatore2) ||
-      (partiteInCorso[id].giocatore1 === giocatore2 && partiteInCorso[id].giocatore2 === giocatore1)
-    );
-    if (idPartitaDaEliminare) {
-      delete partiteInCorso[idPartitaDaEliminare];
+  
+    let idDaEliminare = null;
+    for (const id in partiteInCorso) {
+      const p = partiteInCorso[id];
+      if (
+        (p.giocatore1 === giocatore1 && p.giocatore2 === giocatore2) ||
+        (p.giocatore1 === giocatore2 && p.giocatore2 === giocatore1)
+      ) {
+        idDaEliminare = id;
+        break;
+      }
+    }
+  
+    if (idDaEliminare) {
+      delete partiteInCorso[idDaEliminare];
       emitAggiornaPartite();
     }
     aggiornaListaGiocatori();
   });
 
   socket.on("logout", ({ username }) => {
-    for (const [sid, user] of Object.entries(giocatoriConnessi)) {
-      if (user === username) {
+    for (const sid in giocatoriConnessi) {
+      if (giocatoriConnessi[sid] === username) {
         delete giocatoriConnessi[sid];
       }
     }
-    if (statoGiocatori[username]) {
-      statoGiocatori[username] = "libero";
-    }
+    statoGiocatori[username] = "libero";
     console.log(`${username} ha eseguito logout`);
     aggiornaListaGiocatori();
   });
 
   socket.on("abbandona_partita", ({ idPartita, giocatoreCheAbbandona }) => {
-    const avversario = Object.values(giocatoriConnessi).find(u => u !== giocatoreCheAbbandona);
-
+    const partita = partiteInCorso[idPartita];
+    if (!partita) return;
+  
+    const avversario = partita.giocatore1 === giocatoreCheAbbandona
+      ? partita.giocatore2
+      : partita.giocatore1;
+  
     statoGiocatori[giocatoreCheAbbandona] = "libero";
-    if (avversario) statoGiocatori[avversario] = "libero";
-
+    statoGiocatori[avversario] = "libero";
+  
     delete partiteInCorso[idPartita];
     emitAggiornaPartite();
-
-    for (const [sid, user] of Object.entries(giocatoriConnessi)) {
-      if (user === avversario) {
-        io.to(sid).emit("avversario_abbandona");
+  
+    for (const sid in giocatoriConnessi) {
+      if (giocatoriConnessi[sid] === giocatoreCheAbbandona) {
+        io.to(sid).emit("conferma_abbandono");
+        break;
       }
     }
 
+    for (const sid in giocatoriConnessi) {
+      if (giocatoriConnessi[sid] === avversario) {
+        io.to(sid).emit("vittoria_per_abbandono");
+        break;
+      }
+    }
+  
     aggiornaListaGiocatori();
   });
 
@@ -267,11 +289,11 @@ io.on("connection", (socket) => {
 
   function aggiornaListaGiocatori() {
     const lista = [];
-    const keys = Object.keys(statoGiocatori);
-    for (let i = 0; i < keys.length; i++) {
-      const username = keys[i];
-      const stato = statoGiocatori[username];
-      lista.push({ name: username, playing: stato === "in_partita" });
+    for (const username in statoGiocatori) {
+      lista.push({
+        name: username,
+        playing: statoGiocatori[username] === "in_partita"
+      });
     }
     io.emit("list", lista);
   }

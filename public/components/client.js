@@ -14,7 +14,7 @@ const inviteContainer = document.getElementById("invite-container");
 const inviteSection = document.getElementById("invite-section");
 
 const joinButton = document.getElementById("join-button");
-const nameInput = document.getElementById("name-input");
+//const nameInput = document.getElementById("name-input");
 
 const inviteComponent = generateInviteComponent(gameContainer, socket);
 
@@ -87,7 +87,6 @@ socket.on("join_error", (message) => {
 socket.on("list", (users) => {
   console.log("Lista giocatori aggiornata ricevuta:", users);
   updatePlayerList(users.map(u => ({ name: u.name, playing: u.playing })));
-  // La lista delle partite ora viene gestita dall'evento 'aggiorna_partite'
   nameModal.classList.remove("show");
   backdrop.classList.remove("show");
   gameContainer.style.display = "block";

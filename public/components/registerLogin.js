@@ -13,12 +13,10 @@ export const handleLoginOrRegister = async ({ name, password, isLogin, form, tog
         alert(data.result);
   
         if (!isLogin) {
-          toggle.click(); // passa alla vista login
+          toggle.click(); 
           form.reset();
         } else {
-          // login riuscito
           window.location.href = "/pages/home.html";
-          //window.location.href = "/public/pages/home.html";
         }
       } else {
         alert(data.error || "Errore");
