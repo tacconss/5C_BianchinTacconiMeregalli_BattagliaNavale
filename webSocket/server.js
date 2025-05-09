@@ -26,6 +26,7 @@ app.use("/", express.static(path.join(process.cwd(), "public")));
 app.use("/node_modules", express.static(path.join(process.cwd(), "node_modules")));
 app.use("/pages", express.static(path.join(process.cwd(), "public/pages")));
 
+
 // ============ ROTTA REGISTRAZIONE ============
 app.post("/register", async (req, res) => {
   const { name, password } = req.body;
@@ -211,31 +212,46 @@ io.on("connection", (socket) => {
     aggiornaListaGiocatori();
   });
 
+  socket.on("abbandona_partita", ({ idPartita, giocatoreCheAbbandona }) => {
+    const avversario = Object.values(giocatoriConnessi)
+      .find(u => u !== giocatoreCheAbbandona);
+  
+    statoGiocatori[giocatoreCheAbbandona] = "libero";
+    if (avversario) statoGiocatori[avversario] = "libero";
+  
+    for (const [sid, user] of Object.entries(giocatoriConnessi)) {
+      if (user === avversario) {
+        io.to(sid).emit("avversario_abbandona");
+      }
+    }
+  
+    aggiornaListaGiocatori();
+  });
+  
+
   socket.on("disconnect", () => {
     const username = giocatoriConnessi[socket.id];
     if (username) {
       delete giocatoriConnessi[socket.id];
+
       if (statoGiocatori[username] !== "in_partita") {
         statoGiocatori[username] = "libero";
       }
+
       aggiornaListaGiocatori();
       console.log(`${username} disconnesso.`);
     }
   });
-
+  
+  
   function aggiornaListaGiocatori() {
-    // Raccolgo gli username unici ancora connessi
-    const utentiOnline = {};
-    for (const user of Object.values(giocatoriConnessi)) {
-      utentiOnline[user] = true;
-    }
-
     const lista = [];
-    for (const username of Object.keys(utentiOnline)) {
-      const stato = statoGiocatori[username] || "libero";
+    const keys = Object.keys(statoGiocatori);
+    for (let i = 0; i < keys.length; i++) {
+      const username = keys[i];
+      const stato = statoGiocatori[username];
       lista.push({ name: username, playing: stato === "in_partita" });
     }
-
     io.emit("list", lista);
   }
 });
