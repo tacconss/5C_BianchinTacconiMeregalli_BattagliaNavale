@@ -23,11 +23,11 @@ export const generatePartitaComponent = () => {
   campoGioco.innerHTML = `
     <div class="griglia-container">
       <h2>La Tua Griglia</h2>
-      ${grid.creaGrigliaHTML("griglia-giocatore", cols * cellSize, rows * cellSize)}
+      ${grid.creaGrigliaHTML("griglia-giocatore", cols*cellSize, rows*cellSize)}
     </div>
     <div class="griglia-container">
       <h2>Griglia di ${avversario}</h2>
-      ${grid.creaGrigliaHTML("griglia-avversario", cols * cellSize, rows * cellSize)}
+      ${grid.creaGrigliaHTML("griglia-avversario", cols*cellSize, rows*cellSize)}
     </div>
   `;
 
@@ -37,7 +37,7 @@ export const generatePartitaComponent = () => {
   const canvasGiocatore = document.getElementById("griglia-giocatore");
   const ctxGiocatore = canvasGiocatore.getContext("2d");
 
-  const shipColors = { 5: 'red', 4: 'pink', 3: 'green', 2: 'orange', 1: 'purple' };
+  const shipColors = {5: 'red', 4: 'pink', 3: 'green', 2: 'orange', 1: 'purple'};
   const navi = [5, 4, 3, 2, 1, 1];
   const naviPosizionate = [];
 
@@ -48,42 +48,70 @@ export const generatePartitaComponent = () => {
     const coordinate = grid.posizionaNave(lunghezza);
     naviPosizionate.push({ coordinate, lunghezza });
     ctxGiocatore.fillStyle = shipColors[lunghezza];
-    coordinate.forEach(({ x, y }) => {
-      ctxGiocatore.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
-      ctxGiocatore.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+    coordinate.forEach(({x, y}) => {
+      ctxGiocatore.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+      ctxGiocatore.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
     });
   });
 
+  const colpiEffettuati = new Set();
+
+  const naviAvversarioPosizionate = [
+    { coordinate: [{ x: 1, y: 1 }, { x: 1, y: 2 }, { x: 1, y: 3 }, { x: 1, y: 4 }, { x: 1, y: 5 }], lunghezza: 5 },
+    { coordinate: [{ x: 2, y: 6 }, { x: 2, y: 7 }, { x: 2, y: 8 }, { x: 2, y: 9 }], lunghezza: 4 },
+  ];
+
+  const colpoRiuscito = (x, y) => {
+    return naviAvversarioPosizionate.some(nave => 
+      nave.coordinate.some(cella => cella.x === x && cella.y === y)
+    );
+  };
+
   const canvasAvv = document.getElementById("griglia-avversario");
-
+  
   const handleClick = (x, y) => {
-    console.log(`Click su x:${x}, y:${y}`);
-    const ctxAvv = canvasAvv.getContext("2d");
-    const cellData = ctxAvv.getImageData(x * cellSize, y * cellSize, 1, 1).data;
+    const colpo = `${x}-${y}`;
 
-    if (cellData[3] !== 0) {
+    if (colpiEffettuati.has(colpo)) {
       console.log("Cella già colpita!");
       return;
     }
 
+    colpiEffettuati.add(colpo);
+
+    console.log(`Click su x:${x}, y:${y}`);
+    const ctxAvv = canvasAvv.getContext("2d");
+
     socket.emit("colpo", {
       idPartita,
       giocatoreAttaccante: username,
-      coordinate: { x, y }
+      coordinate: {x, y}
     });
     turnoInfo.innerText = `In attesa di ${avversario}...`;
+
+    ctxAvv.fillStyle = "yellow";
+    ctxAvv.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+    ctxAvv.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+
+    if (colpoRiuscito(x, y)) {
+      ctxAvv.fillStyle = "green";
+    } else {
+      ctxAvv.fillStyle = "red";
+    }
+
+    ctxAvv.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+    ctxAvv.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
   };
 
-  canvasAvv.onclick = (e) => {
+  canvasAvv.addEventListener('click', (e) => {
     const rect = canvasAvv.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) / cellSize);
     const y = Math.floor((e.clientY - rect.top) / cellSize);
-
+   
     if (x >= 0 && x < cols && y >= 0 && y < rows) {
       handleClick(x, y);
     }
-  };
-
+  });
 
   abbandonaBtn.onclick = () => {
     socket.emit("abbandona_partita", {
@@ -93,12 +121,8 @@ export const generatePartitaComponent = () => {
     window.location.href = "/pages/home.html";
   };
 
-  socket.on("conferma_abbandono", () => {
+  socket.on("avversario_abbandona", () => {
     window.location.href = "/pages/home.html";
-  });
-
-  socket.on("vittoria_per_abbandono", () => {
-    window.location.href = "/pages/win.html";
   });
 
   socket.on("cambio_turno", ({ prossimoGiocatore }) => {
@@ -109,36 +133,30 @@ export const generatePartitaComponent = () => {
     }
   });
 
-  socket.on("risultato_colpo", ({ x, y, tipoRisultato, giocatoreColpito, naveAffondataInfo }) => {
+  socket.on("risultato_colpo", ({x, y, colpito, giocatoreColpito, naveAffondataInfo}) => {
     const ctx = document.getElementById(
       giocatoreColpito === username ? "griglia-giocatore" : "griglia-avversario"
     ).getContext("2d");
 
-    if (tipoRisultato === "colpito") {
+    if (colpito) {
       ctx.fillStyle = 'green'; 
-      ctx.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
-      ctx.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
-    }
-    else if (tipoRisultato === "mancato") {
-      ctx.fillStyle = "red";
+    } else {
+      ctx.fillStyle = "red"; 
       ctx.beginPath();
-      ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize / 4, 0, 2 * Math.PI);
+      ctx.arc(x*cellSize+cellSize/2, y*cellSize+cellSize/2, cellSize/4, 0, 2*Math.PI);
       ctx.fill();
     }
-    else if (tipoRisultato === "affondato") {
-      ctx.fillStyle = "darkgreen"; 
-      if (naveAffondataInfo && naveAffondataInfo.celle) {
-        naveAffondataInfo.celle.forEach(c => {
-          ctx.fillRect(
-            c.x * cellSize + 1,
-            c.y * cellSize + 1,
-            cellSize - 2,
-            cellSize - 2
-          );
-        });
-      }
+
+    ctx.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+    ctx.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+
+    if (naveAffondataInfo) {
+      naveAffondataInfo?.celle?.forEach(c => {
+        ctx.fillStyle = "darkgreen";
+        ctx.fillRect(c.x*cellSize+1, c.y*cellSize+1, cellSize-2, cellSize-2);
+        ctx.strokeRect(c.x*cellSize+1, c.y*cellSize+1, cellSize-2, cellSize-2);
+      });
     }
-    
   });
 };
 
