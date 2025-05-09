@@ -4,7 +4,7 @@ import { generateGiocatoreComponent } from "../components/giocatore.js";
 
 const savedUsername = sessionStorage.getItem("username");
 if (savedUsername) {
-    socket.emit("join", savedUsername);
+  socket.emit("join", savedUsername);
 }
 
 const nameModal = document.getElementById("name-modal");
@@ -42,7 +42,11 @@ function updatePlayerList(users) {
 
 function updateGameList(games = []) {
   let html = "";
-  games.forEach(g => html += `<li>${g}</li>`);
+  if (games && games.length > 0) {
+    games.forEach(game => html += `<li>${game}</li>`);
+  } else {
+    html = "<li>Nessuna partita in corso.</li>";
+  }
   document.getElementById("game-list").innerHTML = html;
 }
 
@@ -81,15 +85,19 @@ socket.on("join_error", (message) => {
 });
 
 socket.on("list", (users) => {
-  console.log("Lista aggiornata ricevuta:", users);
+  console.log("Lista giocatori aggiornata ricevuta:", users);
   updatePlayerList(users.map(u => ({ name: u.name, playing: u.playing })));
-  updateGameList(["Game 1 (P1 vs P2)", "Game 2 (P3 vs P4)"]);
-
+  // La lista delle partite ora viene gestita dall'evento 'aggiorna_partite'
   nameModal.classList.remove("show");
   backdrop.classList.remove("show");
   gameContainer.style.display = "block";
   inviteContainer.style.display = "block";
   if (inviteSection) inviteSection.style.display = "block";
+});
+
+socket.on("aggiorna_partite", (partite) => {
+  console.log("Lista partite aggiornata ricevuta:", partite);
+  updateGameList(partite);
 });
 
 socket.on("ricevi_invito", ({ mittente }) => {

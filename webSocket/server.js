@@ -110,6 +110,12 @@ function remove(utente) {
 // ============ GESTIONE SOCKET.IO (WebSockets) ============
 const giocatoriConnessi = {};
 const statoGiocatori = {};
+const partiteInCorso = {};
+
+function emitAggiornaPartite() {
+  const listaPartite = Object.values(partiteInCorso).map(partita => `${partita.giocatore1} vs ${partita.giocatore2}`);
+  io.emit("aggiorna_partite", listaPartite);
+}
 
 io.on("connection", (socket) => {
   console.log("Connesso:", socket.id);
@@ -163,10 +169,11 @@ io.on("connection", (socket) => {
       }
     }
 
-    if (mittenteSocketId
-      && ricevente
-      && statoGiocatori[mittente] === "libero"
-      && statoGiocatori[ricevente] === "libero"
+    if (
+      mittenteSocketId &&
+      ricevente &&
+      statoGiocatori[mittente] === "libero" &&
+      statoGiocatori[ricevente] === "libero"
     ) {
       statoGiocatori[mittente] = "in_partita";
       statoGiocatori[ricevente] = "in_partita";
@@ -174,8 +181,12 @@ io.on("connection", (socket) => {
       aggiornaListaGiocatori();
 
       const idPartita = `${mittente}-${ricevente}-${Date.now()}`;
+      partiteInCorso[idPartita] = { giocatore1: mittente, giocatore2: ricevente };
+      emitAggiornaPartite(); // Emetti l'aggiornamento della lista partite
+
       io.to(mittenteSocketId).emit("avvia_partita", { avversario: ricevente, idPartita });
       io.to(socket.id).emit("avvia_partita", { avversario: mittente, idPartita });
+      console.log(`Partita avviata tra ${mittente} e ${ricevente}, ID: ${idPartita}`);
 
       aggiornaListaGiocatori();
     } else {
@@ -196,6 +207,14 @@ io.on("connection", (socket) => {
   socket.on("fine_partita", ({ giocatore1, giocatore2 }) => {
     if (giocatore1) statoGiocatori[giocatore1] = "libero";
     if (giocatore2) statoGiocatori[giocatore2] = "libero";
+    const idPartitaDaEliminare = Object.keys(partiteInCorso).find(id =>
+      (partiteInCorso[id].giocatore1 === giocatore1 && partiteInCorso[id].giocatore2 === giocatore2) ||
+      (partiteInCorso[id].giocatore1 === giocatore2 && partiteInCorso[id].giocatore2 === giocatore1)
+    );
+    if (idPartitaDaEliminare) {
+      delete partiteInCorso[idPartitaDaEliminare];
+      emitAggiornaPartite();
+    }
     aggiornaListaGiocatori();
   });
 
@@ -213,21 +232,23 @@ io.on("connection", (socket) => {
   });
 
   socket.on("abbandona_partita", ({ idPartita, giocatoreCheAbbandona }) => {
-    const avversario = Object.values(giocatoriConnessi)
-      .find(u => u !== giocatoreCheAbbandona);
-  
+    const avversario = Object.values(giocatoriConnessi).find(u => u !== giocatoreCheAbbandona);
+
     statoGiocatori[giocatoreCheAbbandona] = "libero";
     if (avversario) statoGiocatori[avversario] = "libero";
-  
+
+    delete partiteInCorso[idPartita];
+    emitAggiornaPartite();
+
     for (const [sid, user] of Object.entries(giocatoriConnessi)) {
       if (user === avversario) {
         io.to(sid).emit("avversario_abbandona");
       }
     }
-  
+
     aggiornaListaGiocatori();
   });
-  
+
 
   socket.on("disconnect", () => {
     const username = giocatoriConnessi[socket.id];
@@ -242,8 +263,8 @@ io.on("connection", (socket) => {
       console.log(`${username} disconnesso.`);
     }
   });
-  
-  
+
+
   function aggiornaListaGiocatori() {
     const lista = [];
     const keys = Object.keys(statoGiocatori);
