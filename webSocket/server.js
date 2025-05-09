@@ -1,5 +1,3 @@
-
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const fs = require("fs");
@@ -11,7 +9,7 @@ const { Server } = require("socket.io");
 const dbAccess = require("../db.js");
 
 const conf = JSON.parse(fs.readFileSync("conf.json"));
-conf.ssl.ca = fs.readFileSync(path.join(process.cwd(),"ca.pem"));
+conf.ssl.ca = fs.readFileSync(path.join(process.cwd(), "ca.pem"));
 
 const connection = mysql.createConnection(conf);
 const app = express();
@@ -26,9 +24,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/", express.static(path.join(process.cwd(), "public")));
 app.use("/node_modules", express.static(path.join(process.cwd(), "node_modules")));
-
 app.use("/pages", express.static(path.join(process.cwd(), "public/pages")));
-
 
 // ============ ROTTA REGISTRAZIONE ============
 app.post("/register", async (req, res) => {
@@ -118,8 +114,13 @@ io.on("connection", (socket) => {
   console.log("Connesso:", socket.id);
 
   socket.on("join", (username) => {
-    const values = Object.values(giocatoriConnessi);
-    const giaConnesso = values.includes(username);
+    // Se username già connesso con un altro socket, disconnetto il vecchio
+    for (const [sockId, user] of Object.entries(giocatoriConnessi)) {
+      if (user === username) {
+        io.sockets.sockets.get(sockId)?.disconnect(true);
+        delete giocatoriConnessi[sockId];
+      }
+    }
 
     giocatoriConnessi[socket.id] = username;
 
@@ -136,20 +137,17 @@ io.on("connection", (socket) => {
   socket.on("invia_invito", ({ destinatario }) => {
     const mittente = giocatoriConnessi[socket.id];
     const keys = Object.keys(giocatoriConnessi);
-    for (let i = 0; i < keys.length; i++) {
-      const sockId = keys[i];
-      const username = giocatoriConnessi[sockId];
-      if (username === destinatario) {
-        if (statoGiocatori[username] === "in_partita") {
+    for (const sockId of keys) {
+      const user = giocatoriConnessi[sockId];
+      if (user === destinatario) {
+        if (statoGiocatori[user] === "in_partita") {
           socket.emit("invito_error", `${destinatario} è già in partita.`);
           return;
         }
-
         io.to(sockId).emit("ricevi_invito", { mittente });
         return;
       }
     }
-
     socket.emit("invito_error", "Giocatore non trovato.");
   });
 
@@ -157,24 +155,24 @@ io.on("connection", (socket) => {
     const ricevente = giocatoriConnessi[socket.id];
     let mittenteSocketId = null;
 
-    const keys = Object.keys(giocatoriConnessi);
-    for (let i = 0; i < keys.length; i++) {
-      const sockId = keys[i];
-      const username = giocatoriConnessi[sockId];
-      if (username === mittente) {
-        mittenteSocketId = sockId;
+    for (const [sid, user] of Object.entries(giocatoriConnessi)) {
+      if (user === mittente) {
+        mittenteSocketId = sid;
         break;
       }
     }
 
-    if (mittenteSocketId && ricevente && statoGiocatori[mittente] === "libero" && statoGiocatori[ricevente] === "libero") {
+    if (mittenteSocketId
+      && ricevente
+      && statoGiocatori[mittente] === "libero"
+      && statoGiocatori[ricevente] === "libero"
+    ) {
       statoGiocatori[mittente] = "in_partita";
       statoGiocatori[ricevente] = "in_partita";
 
       aggiornaListaGiocatori();
 
       const idPartita = `${mittente}-${ricevente}-${Date.now()}`;
-
       io.to(mittenteSocketId).emit("avvia_partita", { avversario: ricevente, idPartita });
       io.to(socket.id).emit("avvia_partita", { avversario: mittente, idPartita });
 
@@ -185,13 +183,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("rifiuta_invito", ({ mittente }) => {
-    const keys = Object.keys(giocatoriConnessi);
-    for (let i = 0; i < keys.length; i++) {
-      const sockId = keys[i];
-      const username = giocatoriConnessi[sockId];
-      if (username === mittente) {
+    for (const [sid, user] of Object.entries(giocatoriConnessi)) {
+      if (user === mittente) {
         const nomeRifiutante = giocatoriConnessi[socket.id];
-        io.to(sockId).emit("invito_rifiutato", { da: nomeRifiutante });
+        io.to(sid).emit("invito_rifiutato", { da: nomeRifiutante });
         break;
       }
     }
@@ -200,7 +195,19 @@ io.on("connection", (socket) => {
   socket.on("fine_partita", ({ giocatore1, giocatore2 }) => {
     if (giocatore1) statoGiocatori[giocatore1] = "libero";
     if (giocatore2) statoGiocatori[giocatore2] = "libero";
+    aggiornaListaGiocatori();
+  });
 
+  socket.on("logout", ({ username }) => {
+    for (const [sid, user] of Object.entries(giocatoriConnessi)) {
+      if (user === username) {
+        delete giocatoriConnessi[sid];
+      }
+    }
+    if (statoGiocatori[username]) {
+      statoGiocatori[username] = "libero";
+    }
+    console.log(`${username} ha eseguito logout`);
     aggiornaListaGiocatori();
   });
 
@@ -208,28 +215,30 @@ io.on("connection", (socket) => {
     const username = giocatoriConnessi[socket.id];
     if (username) {
       delete giocatoriConnessi[socket.id];
-
       if (statoGiocatori[username] !== "in_partita") {
         statoGiocatori[username] = "libero";
       }
-
       aggiornaListaGiocatori();
       console.log(`${username} disconnesso.`);
     }
   });
 
   function aggiornaListaGiocatori() {
+    // Raccolgo gli username unici ancora connessi
+    const utentiOnline = {};
+    for (const user of Object.values(giocatoriConnessi)) {
+      utentiOnline[user] = true;
+    }
+
     const lista = [];
-    const keys = Object.keys(statoGiocatori);
-    for (let i = 0; i < keys.length; i++) {
-      const username = keys[i];
-      const stato = statoGiocatori[username];
+    for (const username of Object.keys(utentiOnline)) {
+      const stato = statoGiocatori[username] || "libero";
       lista.push({ name: username, playing: stato === "in_partita" });
     }
+
     io.emit("list", lista);
   }
 });
-
 
 server.listen(5050, () => {
   console.log(`API`);

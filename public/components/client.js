@@ -128,14 +128,16 @@ const gameList        = document.getElementById("game-list");
 const inviteComponent = generateInviteComponent(gameContainer, socket);
 
 logoutButton.onclick = () => {
-  socket.disconnect();
+  const username = sessionStorage.getItem("username");
+  if (username) socket.emit("logout", username); // notifica al server
+
   sessionStorage.clear();
-  nameModal.classList.add("show");
-  backdrop.classList.add("show");
-  gameContainer.style.display = "none";
-  inviteContainer.style.display = "none";
-  inviteSection && (inviteSection.style.display = "none");
+  socket.disconnect(); // chiude il socket
+
+  // Reload della pagina per inizializzare correttamente tutto
+  window.location.reload();
 };
+
 
 const savedUsername = sessionStorage.getItem("username");
 if (savedUsername) socket.emit("join", savedUsername);
