@@ -1,3 +1,5 @@
+
+// partita.js
 import { generateGridComponent } from "./griglia.js";
 import { socket } from "./socket.js";
 import { generateTurno } from "./turno.js";
@@ -18,6 +20,7 @@ export const generatePartitaComponent = () => {
   const cellSize = 40, rows = 10, cols = 10;
   const grid = generateGridComponent();
 
+  // Genero l'HTML delle due griglie
   campoGioco.innerHTML = `
     <div class="griglia-container">
       <h2>La Tua Griglia</h2>
@@ -29,25 +32,79 @@ export const generatePartitaComponent = () => {
     </div>
   `;
 
+  // Disegno le linee delle griglie
   grid.initializeCanvasGrid("griglia-giocatore", rows, cols, cellSize);
   grid.initializeCanvasGrid("griglia-avversario", rows, cols, cellSize);
 
+  // === POSIZIONAMENTO NAVI SULLA GRIGLIA DEL GIOCATORE ===
+  const canvasGiocatore = document.getElementById("griglia-giocatore");
+  const ctxGiocatore    = canvasGiocatore.getContext("2d");
+
+  // Mappa dei colori per lunghezza nave
+  const shipColors = {
+    5: 'red',
+    4: 'blue',
+    3: 'green',
+    2: 'orange',
+    1: 'purple'
+  };
+  const navi = [5, 4, 3, 2, 1, 1]; // lunghezze delle navi
+
+  // Imposto una sola volta lo stile del bordo
+  ctxGiocatore.strokeStyle = "black";
+  ctxGiocatore.lineWidth   = 2;
+
+  for (const lunghezza of navi) {
+    const coordinate = grid.posizionaNave(lunghezza);
+
+    // Colore di riempimento in base alla lunghezza
+    ctxGiocatore.fillStyle = shipColors[lunghezza] || 'gray';
+    coordinate.forEach(({ x, y }) => {
+      // riempio la cella
+      ctxGiocatore.fillRect(
+        x * cellSize + 1,
+        y * cellSize + 1,
+        cellSize - 2,
+        cellSize - 2
+      );
+      // disegno il bordo della cella
+      ctxGiocatore.strokeRect(
+        x * cellSize + 1,
+        y * cellSize + 1,
+        cellSize - 2,
+        cellSize - 2
+      );
+    });
+  }
+  // =======================================================
+
+  // Preparo il turno di gioco
   const canvasAvv = document.getElementById("griglia-avversario");
   const turno     = generateTurno((x, y) => {
-    socket.emit("colpo", { idPartita, giocatoreAttaccante: username, coordinate:{x,y} });
+    socket.emit("colpo", {
+      idPartita,
+      giocatoreAttaccante: username,
+      coordinate: { x, y }
+    });
     turnoInfo.innerText = `In attesa di ${avversario}...`;
     turno.setTurno(false);
   });
 
+  // Bottone per abbandonare la partita
   abbandonaBtn.onclick = () => {
-    socket.emit("abbandona_partita", { idPartita, giocatoreCheAbbandona: username });
+    socket.emit("abbandona_partita", {
+      idPartita,
+      giocatoreCheAbbandona: username
+    });
     window.location.href = "/pages/home.html";
   };
 
+  // Gestione evento: avversario abbandona
   socket.on("avversario_abbandona", () => {
     window.location.href = "/pages/home.html";
   });
 
+  // Gestione cambio turno
   socket.on("cambio_turno", ({ prossimoGiocatore }) => {
     if (prossimoGiocatore === username) {
       turnoInfo.innerText = "È il tuo turno!";
@@ -59,9 +116,14 @@ export const generatePartitaComponent = () => {
     }
   });
 
+  // Gestione risultato del colpo
   socket.on("risultato_colpo", ({ x, y, tipoRisultato, giocatoreColpito, naveAffondataInfo }) => {
     const ctx = document
-      .getElementById(giocatoreColpito === username ? "griglia-giocatore" : "griglia-avversario")
+      .getElementById(
+        giocatoreColpito === username
+          ? "griglia-giocatore"
+          : "griglia-avversario"
+      )
       .getContext("2d");
 
     if (tipoRisultato === "colpito") {
@@ -80,9 +142,11 @@ export const generatePartitaComponent = () => {
         ctx.fillRect(c.x*cellSize+1, c.y*cellSize+1, cellSize-2, cellSize-2);
       });
     }
+
     turno.setTurno(false);
   });
 
+  // Fine partita: torno alla home
   socket.on("fine_partita_notifica", ({ vincitore }) => {
     window.location.href = "/pages/home.html";
   });
