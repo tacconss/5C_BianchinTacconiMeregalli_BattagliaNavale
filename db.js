@@ -18,7 +18,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
   
   
   
-  // ============ ROTTA REGISTRAZIONE ============
   app.post("/register", async (req, res) => {
     const { name, password } = req.body;
     if (!name || !password) return res.status(400).json({ error: "Campi mancanti" });
@@ -36,7 +35,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
     }
   });
   
-  // ============ ROTTA LOGIN ============
   app.post("/login", async (req, res) => {
     console.log("Login request:", req.body);
     const { name, password } = req.body;
@@ -57,7 +55,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
     }
   });
   
-  // ============ API CRUD UTENTI ============
   app.post("/Utenti/add", (req, res) => {
     const utente = req.body;
     insertUser(utente).then(() => {
@@ -85,7 +82,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
     });
   });
   
-  // ============ FUNZIONI DB ============
   function executeQuery(sql, params = []) {
     return new Promise((resolve, reject) => {
       connection.query(sql, params, (err, result) => {

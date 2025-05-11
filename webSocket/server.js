@@ -276,25 +276,20 @@ io.on("connection", (socket) => {
   const partita = partiteInCorso[idPartita];
   if (!partita) return;
 
-  // Fermare il gioco e assegnare il vincitore
   const perdente = partita.giocatore1 === vincitore ? partita.giocatore2 : partita.giocatore1;
   console.log("Vincitore:", vincitore, "Perdente:", perdente);
-  // Aggiornare lo stato dei giocatori
   statoGiocatori[vincitore] = "libero";
   statoGiocatori[perdente] = "libero";
 
-  // Eliminare la partita dalle partite in corso
   delete partiteInCorso[idPartita];
   emitAggiornaPartite();
 
-  // Inviare la vittoria ai giocatori
 io.to(vincitore).emit("hai_vinto");
 console.log("Messaggio 'hai_vinto' inviato a:", vincitore);
 
 io.to(perdente).emit("hai_perso");
 console.log("Messaggio 'hai_perso' inviato a:", perdente);
 
-  // Aggiornare la lista dei giocatori
   aggiornaListaGiocatori();
 });
 

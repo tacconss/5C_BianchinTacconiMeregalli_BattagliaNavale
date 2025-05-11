@@ -52,12 +52,10 @@ export const generatePartitaComponent = () => {
   const shipColorsAvv = {5:'gray',4:'lightblue',3:'lightgreen',2:'lightpink',1:'lightyellow'};
   const shipsList = [5,4,3,2,1,1];
 
-  //carico o genero le navi di ciascun giocatore usando localStorage
   function loadOrGenerateShips(player, gridInstance) {
     const key = `navi_${player}`;
     let arr = JSON.parse(localStorage.getItem(key) || "null");
     if (!arr) {
-      // genero una sola volta
       arr = shipsList.map(lunghezza => ({
         lunghezza,
         coordinate: gridInstance.posizionaNave(lunghezza)
@@ -70,7 +68,6 @@ export const generatePartitaComponent = () => {
   const naviPosMe = loadOrGenerateShips(username, grid);
   const naviPosAvv = loadOrGenerateShips(avversario, gridA);
 
-  //disegno la mia flotta
   naviPosMe.forEach(({ lunghezza, coordinate }) => {
     ctxMe.fillStyle = shipColors[lunghezza];
     coordinate.forEach(({ x,y }) => {
@@ -79,17 +76,7 @@ export const generatePartitaComponent = () => {
     });
   });
 
-  /*
-  // disegno la flotta avversaria
-  naviPosAvv.forEach(({ lunghezza, coordinate }) => {
-    ctxAv.fillStyle = shipColorsAvv[lunghezza];
-    coordinate.forEach(({ x,y }) => {
-      ctxAv.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-      ctxAv.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-    });
-  });
-*/
-  // logica dei colpi e socket
+
   const colpiEff = new Set();
   const hitTest = (x,y) =>
     naviPosAvv.some(nave => nave.coordinate.some(c=>c.x===x && c.y===y));
@@ -101,26 +88,22 @@ export const generatePartitaComponent = () => {
     socket.emit("colpo", { idPartita, giocatoreAttaccante: username, coordinate:{x,y} });
     turnoInfo.innerText = `In attesa di ${avversario}...`;
 
-    // disegno immediato
     ctxAv.fillStyle = hitTest(x,y) ? "green" : "red";
     ctxAv.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
     ctxAv.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
 
-    // Verifica la vittoria dopo ogni colpo
     checkVictory();
   }
 
-  // Funzione per verificare se tutte le navi sono affondate
 function checkVictory() {
   const tutteAffondate = naviPosAvv.every(nave => 
     nave.coordinate.every(coord => colpiEff.has(`${coord.x}-${coord.y}`))
   );
 
   if (tutteAffondate) {
-    // Redirige entrambi i giocatori alla pagina di vittoria con il nome del vincitore
     socket.emit("vittoria", { idPartita, vincitore: username });
     const url = `/pages/vittoria.html?vincitore=${username}`;
-    window.location.href = url;  // Redirige alla pagina di vittoria
+    window.location.href = url;  
   }
 
 
@@ -149,13 +132,9 @@ socket.on("hai_perso", () => {
 
   abbandonaBtn.onclick = () => {
     socket.emit("abbandona_partita", { idPartita, giocatoreCheAbbandona: username });
-    // Local storage opzionale se desideri pulire i dati locali
-    // localStorage.removeItem(`navi_${username}`);
-    // localStorage.removeItem(`navi_${avversario}`);
     window.location.href = "/pages/home.html";
   };
 
-  // Ascolta il messaggio dal server che notifica l'abbandono
   socket.on("partita_terminata", () => {
     window.location.href = "/pages/home.html";
   });
@@ -187,7 +166,6 @@ socket.on("hai_perso", () => {
       });
     }
 
-    // Verifica la vittoria dopo ogni colpo
     checkVictory();
   });
 };
