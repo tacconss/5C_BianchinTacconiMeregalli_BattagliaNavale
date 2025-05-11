@@ -40,15 +40,21 @@ function updatePlayerList(users) {
   });
 }
 
-function updateGameList(games = []) {
+function updateGameList(gamesObj = {}) {
+  const gameEntries = Object.entries(gamesObj);
   let html = "";
-  if (games && games.length > 0) {
-    games.forEach(game => html += `<li>${game}</li>`);
+
+  if (gameEntries.length > 0) {
+    gameEntries.forEach(([id, descrizione]) => {
+      html += `<li data-game-id="${id}">${descrizione}</li>`;
+    });
   } else {
     html = "<li>Nessuna partita in corso.</li>";
   }
+
   document.getElementById("game-list").innerHTML = html;
 }
+
 
 joinButton.onclick = () => {
   const username = document.getElementById("name-input").value.trim();
@@ -81,7 +87,7 @@ function inviaInvito(nomeDestinatario) {
 }
 
 socket.on("join_error", (message) => {
-  alert(message);
+  console.log(message);
 });
 
 socket.on("list", (users) => {
@@ -98,6 +104,7 @@ socket.on("aggiorna_partite", (partite) => {
   console.log("Lista partite aggiornata ricevuta:", partite);
   updateGameList(partite);
 });
+
 
 socket.on("ricevi_invito", ({ mittente }) => {
   inviteComponent.mostraInvito(mittente);
