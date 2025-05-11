@@ -10,7 +10,7 @@ export const handleLoginOrRegister = async ({ name, password, isLogin, form, tog
       const data = await res.json();
   
       if (data.result) {
-        alert(data.result);
+        console.log(data.result);
   
         if (!isLogin) {
           toggle.click(); 
@@ -19,10 +19,10 @@ export const handleLoginOrRegister = async ({ name, password, isLogin, form, tog
           window.location.href = "/pages/home.html";
         }
       } else {
-        alert(data.error || "Errore");
+        console.log(data.error || "Errore");
       }
     } catch (error) {
-      alert("Errore di rete o server");
+      console.log("Errore di rete o server");
     }
   };
   
