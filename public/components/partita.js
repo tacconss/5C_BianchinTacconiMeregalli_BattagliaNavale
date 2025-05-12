@@ -82,16 +82,24 @@ export const generatePartitaComponent = () => {
     naviPosAvv.some(nave => nave.coordinate.some(c=>c.x===x && c.y===y));
 
   function handleClick(x,y) {
+    if(isMioTurno) {
+
+    let current = username;
     const key = `${x}-${y}`;
     if (colpiEff.has(key)) return;
     colpiEff.add(key);
     socket.emit("colpo", { idPartita, giocatoreAttaccante: username, coordinate:{x,y} });
+    current = avversario;
+    socket.on("colpo",(value)=>{
+      if(idPartita === value.idPartita) if(value.giocatoreAttaccante !== username) {current = username; turnoInfo.innerText = ``;} // Se la partita è corretta ed è finito il turno dell'avversario
+      console.log("Colpo ricevuto:", value);
+      
+    })
     turnoInfo.innerText = `In attesa di ${avversario}...`;
-
     ctxAv.fillStyle = hitTest(x,y) ? "green" : "red";
     ctxAv.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
     ctxAv.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-
+  }
     checkVictory();
   }
 

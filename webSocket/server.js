@@ -120,6 +120,10 @@ function emitAggiornaPartite() {
 io.on("connection", (socket) => {
   console.log("Connesso:", socket.id);
 
+  socket.on("colpo", (value=>{
+    console.log("Colpo ricevuto:", value);
+    io.emit("colpo", value)
+  }));
   socket.on("join", (username) => {
     for (const sockId in giocatoriConnessi) {
       if (giocatoriConnessi[sockId] === username) {
