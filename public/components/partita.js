@@ -121,7 +121,7 @@ socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value
       window.location.href = url;
     }
 
-
+  
     socket.on("hai_vinto", () => {
       console.log("-----------Hai vinto!");
       window.location.href = `/pages/vittoria.html?vincitore=${username}`;
