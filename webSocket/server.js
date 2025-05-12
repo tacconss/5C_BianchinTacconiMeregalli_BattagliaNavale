@@ -119,9 +119,13 @@ function emitAggiornaPartite() {
 
 io.on("connection", (socket) => {
   console.log("Connesso:", socket.id);
+  socket.on("avvia_partita", ({ username, avversario, idPartita }) => {
+    io.emit("avvia_partita", ({ c: username, idPartit: idPartita }));
+  });
 
   socket.on("colpo", (value=>{
     console.log("Colpo ricevuto:", value);
+
     io.emit("colpo", value)
   }));
   socket.on("join", (username) => {

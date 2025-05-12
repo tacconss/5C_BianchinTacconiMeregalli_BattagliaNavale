@@ -8,7 +8,13 @@ export const generatePartitaComponent = () => {
   // Recupera username, avversario e idPartita dal sessionStorage
   const username = sessionStorage.getItem("username");
   const avversario = sessionStorage.getItem("avversario");
-  const idPartita = sessionStorage.getItem("idPartita");
+    const idPartita = sessionStorage.getItem("idPartita");
+  let current;
+  socket.emit("avvia_partita", { username, avversario, idPartita });
+  socket.on("avvia_partita", ({ c, idPartit }) => {
+    if(idPartit === idPartita) current = c;
+  })
+
 
   // Verifica che ci siano tutti i dati necessari
   if (!username || !avversario || !idPartita) {
@@ -27,11 +33,11 @@ export const generatePartitaComponent = () => {
   campoGioco.innerHTML = `
     <div class="griglia-container">
       <h2>La Tua Griglia</h2>
-      ${grid.creaGrigliaHTML("griglia-giocatore", cols*cellSize, rows*cellSize)}
+      ${grid.creaGrigliaHTML("griglia-giocatore", cols * cellSize, rows * cellSize)}
     </div>
     <div class="griglia-container">
       <h2>Griglia di ${avversario}</h2>
-      ${gridA.creaGrigliaHTML("griglia-avversario", cols*cellSize, rows*cellSize)}
+      ${gridA.creaGrigliaHTML("griglia-avversario", cols * cellSize, rows * cellSize)}
     </div>
   `;
 
@@ -48,9 +54,9 @@ export const generatePartitaComponent = () => {
     ctx.lineWidth = 2;
   });
 
-  const shipColors = {5:'red',4:'pink',3:'green',2:'orange',1:'purple'};
-  const shipColorsAvv = {5:'gray',4:'lightblue',3:'lightgreen',2:'lightpink',1:'lightyellow'};
-  const shipsList = [5,4,3,2,1,1];
+  const shipColors = { 5: 'red', 4: 'pink', 3: 'green', 2: 'orange', 1: 'purple' };
+  const shipColorsAvv = { 5: 'gray', 4: 'lightblue', 3: 'lightgreen', 2: 'lightpink', 1: 'lightyellow' };
+  const shipsList = [5, 4, 3, 2, 1, 1];
 
   function loadOrGenerateShips(player, gridInstance) {
     const key = `navi_${player}`;
@@ -70,71 +76,72 @@ export const generatePartitaComponent = () => {
 
   naviPosMe.forEach(({ lunghezza, coordinate }) => {
     ctxMe.fillStyle = shipColors[lunghezza];
-    coordinate.forEach(({ x,y }) => {
-      ctxMe.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-      ctxMe.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+    coordinate.forEach(({ x, y }) => {
+      ctxMe.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+      ctxMe.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
     });
   });
 
-
+socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value.player});
   const colpiEff = new Set();
-  const hitTest = (x,y) =>
-    naviPosAvv.some(nave => nave.coordinate.some(c=>c.x===x && c.y===y));
+  const hitTest = (x, y) =>
+    naviPosAvv.some(nave => nave.coordinate.some(c => c.x === x && c.y === y));
 
-  function handleClick(x,y) {
-    if(isMioTurno) {
+  function handleClick(x, y) {
+    if (current === username){
+      const key = `${x}-${y}`;
+      if (colpiEff.has(key)) return;
+      colpiEff.add(key);
+      socket.emit("colpo", { idPartita, giocatoreAttaccante: username, player: avversario, coordinate: { x, y } });
+      socket.on("colpo", (value) => {
+        if (idPartita === value.idPartita) 
+          if (value.giocatoreAttaccante !== username) { 
+            console.log(value);
+            turnoInfo.innerText = ``; 
+         } // Se la partita è corretta ed è finito il turno dell'avversario
 
-    let current = username;
-    const key = `${x}-${y}`;
-    if (colpiEff.has(key)) return;
-    colpiEff.add(key);
-    socket.emit("colpo", { idPartita, giocatoreAttaccante: username, coordinate:{x,y} });
-    current = avversario;
-    socket.on("colpo",(value)=>{
-      if(idPartita === value.idPartita) if(value.giocatoreAttaccante !== username) {current = username; turnoInfo.innerText = ``;} // Se la partita è corretta ed è finito il turno dell'avversario
-      console.log("Colpo ricevuto:", value);
-      
-    })
-    turnoInfo.innerText = `In attesa di ${avversario}...`;
-    ctxAv.fillStyle = hitTest(x,y) ? "green" : "red";
-    ctxAv.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-    ctxAv.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-  }
+      })
+      turnoInfo.innerText = `In attesa di ${avversario}...`;
+      ctxAv.fillStyle = hitTest(x, y) ? "green" : "red";
+      ctxAv.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+      ctxAv.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+    }
     checkVictory();
   }
 
-function checkVictory() {
-  const tutteAffondate = naviPosAvv.every(nave => 
-    nave.coordinate.every(coord => colpiEff.has(`${coord.x}-${coord.y}`))
-  );
 
-  if (tutteAffondate) {
-    socket.emit("vittoria", { idPartita, vincitore: username });
-    const url = `/pages/vittoria.html?vincitore=${username}`;
-    window.location.href = url;  
+  function checkVictory() {
+    const tutteAffondate = naviPosAvv.every(nave =>
+      nave.coordinate.every(coord => colpiEff.has(`${coord.x}-${coord.y}`))
+    );
+
+    if (tutteAffondate) {
+      socket.emit("vittoria", { idPartita, vincitore: username });
+      const url = `/pages/vittoria.html?vincitore=${username}`;
+      window.location.href = url;
+    }
+
+
+    socket.on("hai_vinto", () => {
+      console.log("-----------Hai vinto!");
+      window.location.href = `/pages/vittoria.html?vincitore=${username}`;
+    });
+
+    socket.on("hai_perso", () => {
+      console.log("------------Hai perso!");
+      window.location.href = `/pages/vittoria.html?perdente=${username}`;
+    });
+
   }
 
 
-  socket.on("hai_vinto", () => {
-  console.log("-----------Hai vinto!");
-  window.location.href = `/pages/vittoria.html?vincitore=${username}`;
-});
 
-socket.on("hai_perso", () => {
-  console.log("------------Hai perso!");
-  window.location.href = `/pages/vittoria.html?perdente=${username}`;
-});
-
-}
-
-
-
-  canvasAv.onclick = function(e) {
+  canvasAv.onclick = function (e) {
     const r = canvasAv.getBoundingClientRect();
-    const x = Math.floor((e.clientX - r.left)/cellSize);
-    const y = Math.floor((e.clientY - r.top)/cellSize);
+    const x = Math.floor((e.clientX - r.left) / cellSize);
+    const y = Math.floor((e.clientY - r.top) / cellSize);
     if (x >= 0 && x < cols && y >= 0 && y < rows) {
-      handleClick(x,y);
+      handleClick(x, y);
     }
   };
 
@@ -151,11 +158,7 @@ socket.on("hai_perso", () => {
     window.location.href = "/pages/home.html";
   });
 
-  socket.on("cambio_turno", ({ prossimoGiocatore }) => {
-    turnoInfo.innerText = prossimoGiocatore === username
-      ? "È il tuo turno!"
-      : `Turno di ${avversario}...`;
-  });
+
 
   socket.on("risultato_colpo", ({ x, y, colpito, giocatoreColpito, naveAffondataInfo }) => {
     const ctx = document
@@ -163,14 +166,14 @@ socket.on("hai_perso", () => {
       .getContext("2d");
 
     ctx.fillStyle = colpito ? "green" : "red";
-    ctx.fillRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
-    ctx.strokeRect(x*cellSize+1, y*cellSize+1, cellSize-2, cellSize-2);
+    ctx.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+    ctx.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
 
     if (naveAffondataInfo) {
       naveAffondataInfo.celle.forEach(c => {
         ctx.fillStyle = "darkgreen";
-        ctx.fillRect(c.x*cellSize+1, c.y*cellSize+1, cellSize-2, cellSize-2);
-        ctx.strokeRect(c.x*cellSize+1, c.y*cellSize+1, cellSize-2, cellSize-2);
+        ctx.fillRect(c.x * cellSize + 1, c.y * cellSize + 1, cellSize - 2, cellSize - 2);
+        ctx.strokeRect(c.x * cellSize + 1, c.y * cellSize + 1, cellSize - 2, cellSize - 2);
       });
     }
 
