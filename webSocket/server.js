@@ -119,6 +119,7 @@ function emitAggiornaPartite() {
 
 io.on("connection", (socket) => {
   console.log("Connesso:", socket.id);
+  
   socket.on("avvia_partita", ({ username, avversario, idPartita }) => {
     io.emit("avvia_partita", ({ c: username, idPartit: idPartita }));
   });
@@ -303,19 +304,21 @@ io.on("connection", (socket) => {
 });
 
 
-  socket.on("disconnect", () => {
-    const username = giocatoriConnessi[socket.id];
-    if (username) {
-      delete giocatoriConnessi[socket.id];
+socket.on("disconnect", () => {
+  const username = giocatoriConnessi[socket.id];
+  if (username) {
+    delete giocatoriConnessi[socket.id];
 
-      if (statoGiocatori[username] !== "in_partita") {
-        statoGiocatori[username] = "libero";
-      }
+    if (statoGiocatori[username] !== "in_partita") {
+      statoGiocatori[username] = "libero";
       delete statoGiocatori[username];
-      aggiornaListaGiocatori();
-      console.log(`${username} disconnesso.`);
     }
-  });
+
+    aggiornaListaGiocatori();
+    console.log(`${username} disconnesso.`);
+  }
+});
+
 
 
   function aggiornaListaGiocatori() {
