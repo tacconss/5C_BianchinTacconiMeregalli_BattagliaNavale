@@ -264,7 +264,7 @@ io.on("connection", (socket) => {
   
     for (const sid in giocatoriConnessi) {
       if (giocatoriConnessi[sid] === giocatoreCheAbbandona) {
-        io.to(sid).emit("conferma_abbandono");
+        io.emit("conferma_abbandono",idPartita);
         break;
       }
     }
@@ -280,6 +280,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("vittoria", ({ idPartita, vincitore }) => {
+    console.log(vincitore);
     console.log("Vittoria ricevuta:", idPartita, vincitore);
   const partita = partiteInCorso[idPartita];
   if (!partita) return;
@@ -292,11 +293,8 @@ io.on("connection", (socket) => {
   delete partiteInCorso[idPartita];
   emitAggiornaPartite();
 
-io.to(vincitore).emit("hai_vinto");
-console.log("Messaggio 'hai_vinto' inviato a:", vincitore);
+  io.emit("end_game", {id: idPartita, winner: vincitore});
 
-io.to(perdente).emit("hai_perso");
-console.log("Messaggio 'hai_perso' inviato a:", perdente);
 
   aggiornaListaGiocatori();
 });

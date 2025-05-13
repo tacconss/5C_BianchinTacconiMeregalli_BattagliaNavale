@@ -88,6 +88,7 @@ socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value
     naviPosAvv.some(nave => nave.coordinate.some(c => c.x === x && c.y === y));
 
   function handleClick(x, y) {
+
     if (current === username){
       const key = `${x}-${y}`;
       if (colpiEff.has(key)) return;
@@ -105,10 +106,25 @@ socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value
       ctxAv.fillStyle = hitTest(x, y) ? "green" : "red";
       ctxAv.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
       ctxAv.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
-    }
+   }
     checkVictory();
   }
+  socket.on("end_game", ({id, winner}) => {
+    console.log("Entrato")
+    if(id === idPartita) 
+      if(username === winner) window.location.href = `/pages/vittoria.html?vincitore=${username}`;
+      else window.location.href = `/pages/loose.html?sconfitta=${username}`;
+  });
 
+  abbandonaBtn.onclick = () => {
+    socket.emit("abbandona_partita", { idPartita, giocatoreCheAbbandona: username });
+    socket.on("conferma_abbandono", (id) => {
+      if (id === idPartita) {  
+    window.location.href = "/pages/home.html";
+      }
+    }
+    );
+  };
 
   function checkVictory() {
     const tutteAffondate = naviPosAvv.every(nave =>
@@ -122,15 +138,9 @@ socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value
     }
 
   
-    socket.on("hai_vinto", () => {
-      console.log("-----------Hai vinto!");
-      window.location.href = `/pages/vittoria.html?vincitore=${username}`;
-    });
 
-    socket.on("hai_perso", () => {
-      console.log("------------Hai perso!");
-      window.location.href = `/pages/vittoria.html?perdente=${username}`;
-    });
+
+
 
   }
 
@@ -145,10 +155,7 @@ socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value
     }
   };
 
-  abbandonaBtn.onclick = () => {
-    socket.emit("abbandona_partita", { idPartita, giocatoreCheAbbandona: username });
-    window.location.href = "/pages/home.html";
-  };
+  
 
   socket.on("partita_terminata", () => {
     window.location.href = "/pages/home.html";
