@@ -248,34 +248,37 @@ io.on("connection", (socket) => {
     aggiornaListaGiocatori();
   });
 
-  socket.on("abbandona_partita", ({ idPartita, giocatoreCheAbbandona }) => {
+  socket.on("abbandona_partita", ({ idPartita, giocatoreCheAbbandona}) => {
     const partita = partiteInCorso[idPartita];
     if (!partita) return;
   
     const avversario = partita.giocatore1 === giocatoreCheAbbandona
       ? partita.giocatore2
       : partita.giocatore1;
-  
+
+    io.emit("abbandona_partita", { idPartita, avversario });
+
     statoGiocatori[giocatoreCheAbbandona] = "libero";
     statoGiocatori[avversario] = "libero";
   
     delete partiteInCorso[idPartita];
     emitAggiornaPartite();
-  
+  /*
     for (const sid in giocatoriConnessi) {
       if (giocatoriConnessi[sid] === giocatoreCheAbbandona) {
         io.emit("conferma_abbandono",idPartita);
         break;
       }
     }
-
+*/
+/*
     for (const sid in giocatoriConnessi) {
       if (giocatoriConnessi[sid] === avversario) {
         io.to(sid).emit("vittoria_per_abbandono");
         break;
       }
     }
-  
+      */
     aggiornaListaGiocatori();
   });
 

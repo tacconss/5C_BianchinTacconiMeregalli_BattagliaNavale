@@ -8,11 +8,11 @@ export const generatePartitaComponent = () => {
   // Recupera username, avversario e idPartita dal sessionStorage
   const username = sessionStorage.getItem("username");
   const avversario = sessionStorage.getItem("avversario");
-    const idPartita = sessionStorage.getItem("idPartita");
+  const idPartita = sessionStorage.getItem("idPartita");
   let current;
   socket.emit("avvia_partita", { username, avversario, idPartita });
   socket.on("avvia_partita", ({ c, idPartit }) => {
-    if(idPartit === idPartita) current = c;
+    if (idPartit === idPartita) current = c;
   })
 
 
@@ -82,48 +82,60 @@ export const generatePartitaComponent = () => {
     });
   });
 
-socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value.player});
+  socket.on("colpo", (value) => { if (idPartita === value.idPartita) current = value.player });
   const colpiEff = new Set();
   const hitTest = (x, y) =>
     naviPosAvv.some(nave => nave.coordinate.some(c => c.x === x && c.y === y));
 
   function handleClick(x, y) {
 
-    if (current === username){
+    if (current === username) {
       const key = `${x}-${y}`;
       if (colpiEff.has(key)) return;
       colpiEff.add(key);
       socket.emit("colpo", { idPartita, giocatoreAttaccante: username, player: avversario, coordinate: { x, y } });
       socket.on("colpo", (value) => {
-        if (idPartita === value.idPartita) 
-          if (value.giocatoreAttaccante !== username) { 
+        if (idPartita === value.idPartita)
+          if (value.giocatoreAttaccante !== username) {
             console.log(value);
-            turnoInfo.innerText = ``; 
-         } // Se la partita è corretta ed è finito il turno dell'avversario
+            turnoInfo.innerText = ``;
+          } // Se la partita è corretta ed è finito il turno dell'avversario
 
       })
       turnoInfo.innerText = `In attesa di ${avversario}...`;
       ctxAv.fillStyle = hitTest(x, y) ? "green" : "red";
       ctxAv.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
       ctxAv.strokeRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
-   }
+    }
     checkVictory();
   }
-  socket.on("end_game", ({id, winner}) => {
+  socket.on("end_game", ({ id, winner }) => {
     console.log("Entrato")
-    if(id === idPartita) 
-      if(username === winner) window.location.href = `/pages/vittoria.html?vincitore=${username}`;
+    if (id === idPartita)
+      if (username === winner) window.location.href = `/pages/vittoria.html?vincitore=${username}`;
       else window.location.href = `/pages/loose.html?sconfitta=${username}`;
   });
-
-  abbandonaBtn.onclick = () => {
-    socket.emit("abbandona_partita", { idPartita, giocatoreCheAbbandona: username });
-    socket.on("conferma_abbandono", (id) => {
-      if (id === idPartita) {  
-    window.location.href = "/pages/home.html";
+  socket.on("abbandona_partita", (values)=>{
+      console.log(values);
+      if(values.idPartita === idPartita)
+      if (values.avversario !== username) {
+        //alert("if");
+        window.location.href = "/pages/home.html";
+      } else {
+        //alert("else");
+        window.location.href = `/pages/vittoria.html?vincitore=${username}`;
       }
-    }
-    );
+  });
+  abbandonaBtn.onclick = () => {
+    const gAbbandona = { idPartita, giocatoreCheAbbandona: username};
+    const gWin = { idPartita, vincitore: avversario };
+    //alert("Sei sicuro di voler abbandonare la partita?");
+    socket.emit("abbandona_partita", gAbbandona);
+    // socket.on("conferma_abbandono", (id) => {
+
+
+    
+    //  });
   };
 
   function checkVictory() {
@@ -137,7 +149,7 @@ socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value
       window.location.href = url;
     }
 
-  
+
 
 
 
@@ -155,7 +167,7 @@ socket.on("colpo", (value) => {if(idPartita === value.idPartita) current = value
     }
   };
 
-  
+
 
   socket.on("partita_terminata", () => {
     window.location.href = "/pages/home.html";
