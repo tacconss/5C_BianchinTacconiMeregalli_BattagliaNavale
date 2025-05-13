@@ -193,9 +193,10 @@ io.on("connection", (socket) => {
       const idPartita = `${mittente}-${ricevente}-${Date.now()}`;
       partiteInCorso[idPartita] = { giocatore1: mittente, giocatore2: ricevente };
       emitAggiornaPartite(); 
-  
-      io.to(mittenteSocketId).emit("avvia_partita", { avversario: ricevente, idPartita });
-      io.to(socket.id).emit("avvia_partita", { avversario: mittente, idPartita });
+      console.log(mittenteSocketId);
+      console.log(socket.id)
+      io.to(mittenteSocketId).emit("avvia_partita", { socket: mittenteSocketId, avversario: ricevente, idPartit: idPartita });
+      io.to(socket.id).emit("avvia_partita", { socket: socket.id, avversario: mittente, idPartit: idPartita });
       console.log(`Partita avviata tra ${mittente} e ${ricevente}, ID: ${idPartita}`);
   
       aggiornaListaGiocatori();

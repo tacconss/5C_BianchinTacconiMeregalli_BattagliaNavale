@@ -2,6 +2,10 @@ import { socket } from "./socket.js";
 import { generateInviteComponent } from "../components/invite.js";
 import { generateGiocatoreComponent } from "../components/giocatore.js";
 
+socket.on("connect", () => {
+  sessionStorage.setItem("socket",socket.id);
+});
+
 const savedUsername = sessionStorage.getItem("username");
 if (savedUsername) {
   socket.emit("join", savedUsername);
@@ -118,13 +122,16 @@ socket.on("ricevi_invito", ({ mittente }) => {
 socket.on("invito_error", (msg) => {
   alert("Errore invito: " + msg);
 });
+  //sessionStorage.setItem("socket",socket.id);
 
-socket.on("avvia_partita", ({ avversario, idPartita }) => {
+socket.on("avvia_partita", ({ socket, avversario, idPartit }) => {
+  if(socket !== sessionStorage.getItem("socket")) return;
   sessionStorage.setItem("avversario", avversario);
-  sessionStorage.setItem("idPartita", idPartita);
+  sessionStorage.setItem("idPartita", idPartit);
   window.location.href = "../pages/partita.html";
 });
 
 socket.on("invito_rifiutato", ({ da }) => {
   alert(`${da} ha rifiutato il tuo invito.`);
+
 });
