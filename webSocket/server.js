@@ -311,7 +311,7 @@ io.on("connection", (socket) => {
       if (statoGiocatori[username] !== "in_partita") {
         statoGiocatori[username] = "libero";
       }
-
+      delete statoGiocatori[username];
       aggiornaListaGiocatori();
       console.log(`${username} disconnesso.`);
     }

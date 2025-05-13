@@ -85,7 +85,12 @@ function inviaInvito(nomeDestinatario) {
 
   socket.emit("invia_invito", { destinatario: nomeDestinatario });
 }
+document.getElementById("logout-button").onclick = () => {
+  location.href = "https://www.google.com/"
+  socket.disconnect();
+};
 
+;
 socket.on("join_error", (message) => {
   console.log(message);
 });
