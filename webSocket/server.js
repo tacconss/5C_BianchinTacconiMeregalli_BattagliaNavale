@@ -126,10 +126,14 @@ io.on("connection", (socket) => {
 
   socket.on("colpo", (value=>{
     console.log("Colpo ricevuto:", value);
-    io.emit("ping");
+  
+  
+    io.emit("ping", socket.id);
+  
+  
     io.emit("colpo", value);
   }));
-  
+
   socket.on("join", (username) => {
     for (const sockId in giocatoriConnessi) {
       if (giocatoriConnessi[sockId] === username) {
