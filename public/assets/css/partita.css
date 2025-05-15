@@ -1,77 +1,98 @@
 body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #0a2a43;
+    color: #f0f8ff;
     display: flex;
     justify-content: center;
     align-items: flex-start;
     height: 100vh;
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    overflow: auto;
 }
-
 
 h1 {
     text-align: center;
+    margin-top: 1rem;
+    font-size: 2.5rem;
+    color: #00bfff;
 }
 
-.container {
-    display: flex;
+#partita-container {
     width: 100%;
-    height: 100%;
     max-width: 1200px;
-    justify-content: space-between;
-    gap: 40px;
-}
-
-.griglia-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    padding: 20px;
-    background-color: #fff;
-    border-right: 2px solid #ddd;
-}
-
-.griglia-container-avversario {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex: 1;
-    padding: 20px;
-    background-color: #fff;
-}
-
-h2 {
-    margin-bottom: 10px;
-    color: #333;
-}
-
-canvas {
-    border: 1px solid #000;
-    margin-top: 10px;
+    padding: 1rem;
+    box-sizing: border-box;
 }
 
 #turno-info {
     text-align: center;
-    font-size: 1.5rem;
-    margin-top: 20px;
+    font-size: 1.2rem;
+    margin: 1rem 0;
+    background-color: #062236;
+    padding: 0.8rem;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.griglia-container, .griglia-container-avversario {
+    background-color: #143d59;
+    border: 2px solid #0b1f2a;
+    border-radius: 8px;
+    padding: 1rem;
+    flex: 1;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h2 {
+    margin-bottom: 1rem;
+    color: #ffffff;
+    font-size: 1.4rem;
+}
+
+canvas {
+    border: 2px solid #ffffff;
+    background-color: #0e3b5c;
+    margin-top: 0.5rem;
+    cursor: crosshair;
+}
+
+#abbandonaBtn {
+    display: block;
+    margin: 2rem auto 0;
+    background-color: #ff4c4c;
+    color: white;
+    border: none;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#abbandonaBtn:hover {
+    background-color: #e04343;
 }
 
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
         align-items: center;
-        gap: 20px;
-    }
-
-    .griglia-container,
-    .griglia-container-avversario {
-        flex: none;
-        width: 100%;
-        padding: 10px;
     }
 
     canvas {
-        width: 80%;
+        width: 90%;
         height: auto;
     }
 }
