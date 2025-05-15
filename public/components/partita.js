@@ -179,7 +179,7 @@ export const generatePartitaComponent = () => {
 
 
   socket.on("ping", () => {
-    console.log("Ping ricevuto dal server");
+    console.log("Ping ricevuto dal server", socket.id);
   });
 
 
