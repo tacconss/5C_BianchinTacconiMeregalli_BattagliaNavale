@@ -115,9 +115,9 @@ export const generatePartitaComponent = () => {
       if (username === winner) window.location.href = `/pages/vittoria.html?vincitore=${username}`;
       else window.location.href = `/pages/loose.html?sconfitta=${username}`;
   });
-  socket.on("abbandona_partita", (values)=>{
-      console.log(values);
-      if(values.idPartita === idPartita)
+  socket.on("abbandona_partita", (values) => {
+    console.log(values);
+    if (values.idPartita === idPartita)
       if (values.avversario !== username) {
         //alert("if");
         window.location.href = "/pages/home.html";
@@ -127,14 +127,14 @@ export const generatePartitaComponent = () => {
       }
   });
   abbandonaBtn.onclick = () => {
-    const gAbbandona = { idPartita, giocatoreCheAbbandona: username};
+    const gAbbandona = { idPartita, giocatoreCheAbbandona: username };
     const gWin = { idPartita, vincitore: avversario };
     //alert("Sei sicuro di voler abbandonare la partita?");
     socket.emit("abbandona_partita", gAbbandona);
     // socket.on("conferma_abbandono", (id) => {
 
 
-    
+
     //  });
   };
 
@@ -175,6 +175,11 @@ export const generatePartitaComponent = () => {
 
   socket.on("avversario_abbandona", () => {
     window.location.href = "/pages/home.html";
+  });
+
+
+  socket.on("ping", () => {
+    console.log("Ping ricevuto dal server");
   });
 
 
