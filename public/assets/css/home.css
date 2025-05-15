@@ -72,7 +72,6 @@ body {
   font-size: 1rem;
   cursor: pointer;
   border-radius: 6px;
-  transition: background-color 0.3s;
 }
 
 .modal-footer button:hover {
@@ -110,7 +109,6 @@ h1 {
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s;
 }
 
 .logout-btn:hover {
@@ -153,7 +151,6 @@ ul li {
   border-radius: 4px;
   font-size: 1rem;
   color: #e0f0ff;
-  transition: background-color 0.3s;
 }
 
 ul li:hover {
